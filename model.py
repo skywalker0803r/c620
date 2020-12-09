@@ -2,6 +2,12 @@ import torch
 from torch import nn
 from sp2wt import sp2wt
 
+class MB(nn.Module):
+  def __init__(self):
+    super().__init__()
+  def forward(self,x):
+    return x/torch.sum(x,dim=-1).reshape(-1,1)
+
 # 1 C620_OP 
 class C620_OP(nn.Module):
     def __init__(self,c_dim=3,f_dim=41,o_dim=9,h_dim=128):
