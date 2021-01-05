@@ -41,15 +41,19 @@ class Predict(object):
   def c620_wt(self,c620_x):
     idx = c620_x.index
     c620_sf = self.model_c620_sf.predict(c620_x).iloc[:,:41*4]
+    
     x41 = c620_x[self.c620_col_names['x41']].values
+    
     s1 = c620_sf[self.c620_col_names['vent_gas_sf']].values
     s2 = c620_sf[self.c620_col_names['distillate_sf']].values
     s3 = c620_sf[self.c620_col_names['sidedraw_sf']].values
     s4 = c620_sf[self.c620_col_names['bottoms_sf']].values
+    
     w1 = sp2wt(x41,s1)
     w2 = sp2wt(x41,s2)
     w3 = sp2wt(x41,s3)
     w4 = sp2wt(x41,s4)
+    
     c620_wt = np.hstack((w1,w2,w3,w4))
     c620_wt = pd.DataFrame(
         c620_wt,
@@ -59,24 +63,31 @@ class Predict(object):
         self.c620_col_names['distillate_x']+\
         self.c620_col_names['sidedraw_x']+\
         self.c620_col_names['bottoms_x'])
-    return c620_wt
+    
+    return c620_sf
+  
   # Predict c620 OP
   def c620_op(self,c620_x):
     return self.model_c620_op.predict(c620_x).iloc[:,41*4:] 
+
 #==============================================================================================================     
   # Predict c660 WT
   def c660_wt(self,c660_x):
     idx = c660_x.index
-    c660_sf = self.model_c660_sf.predict(c660_x[self.model_c660_sf.x_col]).iloc[:,:41*4]
+    c660_sf = self.model_c660_sf.predict(c660_x).iloc[:,:41*4]
+    
     x41 = c660_x.loc[idx,self.c660_col_names['x41']]
+    
     s1 = c660_sf[self.c660_col_names['vent_gas_sf']].values
     s2 = c660_sf[self.c660_col_names['distillate_sf']].values
     s3 = c660_sf[self.c660_col_names['sidedraw_sf']].values
     s4 = c660_sf[self.c660_col_names['bottoms_sf']].values
+    
     w1 = sp2wt(x41,s1)
     w2 = sp2wt(x41,s2)
     w3 = sp2wt(x41,s3)
     w4 = sp2wt(x41,s4)
+    
     c660_wt = np.hstack((w1,w2,w3,w4))
     c660_wt = pd.DataFrame(
         c660_wt,
@@ -86,20 +97,26 @@ class Predict(object):
         self.c660_col_names['distillate_x']+\
         self.c660_col_names['sidedraw_x']+\
         self.c660_col_names['bottoms_x'])
+    
     return c660_wt
+  
   # Predict c660 OP
   def c660_op(self,c660_x):
     return self.model_c660_op.predict(c660_x).iloc[:,41*4:]
+
 #==============================================================================================================   
   # Predict c670 WT
   def c670_wt(self,c670_x):
     idx = c670_x.index
     c670_sf = self.model_c670_sf.predict(c670_x).iloc[:,:41*4]
     x41 = c670_x.iloc[:,:41].values
+    
     s1 = c670_sf[self.c670_col_names['distillate_sf']].values
     s2 = c670_sf[self.c670_col_names['bottoms_sf']].values
+    
     w1 = sp2wt(x41,s1)
     w2 = sp2wt(x41,s2)
+    
     c670_wt = np.hstack((w1,w2))
     c670_wt = pd.DataFrame(
         c670_wt,
@@ -107,9 +124,9 @@ class Predict(object):
         columns=
         self.c670_col_names['distillate_x']+\
         self.c670_col_names['bottoms_x'])
+    
     return c670_wt
   # Predict c670 OP
   def c670_op(self,c670_x):
-    c670_op = self.model_c670_op.predict(c670_x).iloc[:,41*2:]
-    return c670_op
+    return self.model_c670_op.predict(c670_x).iloc[:,41*2:]
 #============================================================================================================== 
