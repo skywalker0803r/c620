@@ -14,12 +14,13 @@ c660_log_path = './log/c660_log.xlsx'
 c670_log_path = './log/c670_log.xlsx'
 
 # functions
-def check_log_or_create(tag,columns,log_path):
-    log_df = pd.read_excel(log_path)
-    if len(log_df.index) == 0:
-        log_df = pd.DataFrame(index=[tag],columns=columns)
-        log_df.to_excel(log_path)
-    return log_df
+def save(row,log_path):
+    log_df = pd.read_excel(log_path,index_col=0)
+    if len(log_df) != 0:
+        log_df = log_df.append(row)
+    else:
+        log_df = row
+    log_df.to_excel(log_path)
 
 def show_progress():
     my_bar = st.progress(0)
@@ -34,12 +35,6 @@ tag = st.text_input('輸入tag')
 if st.button('確定'):
     st.balloons()
     st.write('tag名稱為:{}'.format(tag))
-
-# instance log_df
-icg_log_df = check_log_or_create(tag,predict.model_icg.x_col+predict.model_icg.y_col,icg_log_path)
-c620_log_df = check_log_or_create(tag,predict.model_c620_sf.x_col+predict.model_c620_sf.y_col,c620_log_path)
-c660_log_df = check_log_or_create(tag,predict.model_c660_sf.x_col+predict.model_c660_sf.y_col,c660_log_path)
-c670_log_df = check_log_or_create(tag,predict.model_c670_sf.x_col+predict.model_c670_sf.y_col,c670_log_path)
 
 # ICG INPUT
 st.subheader('(ICG)請填入以下數值')
@@ -58,9 +53,7 @@ if st.button('ICG預測'):
     st.subheader('輸出值為：')
     st.write(icg_dist)
     # save as excel
-    icg_log_df.loc[tag,ICG_Input.columns] = ICG_Input.loc[tag,ICG_Input.columns]
-    icg_log_df.loc[tag,icg_dist.columns] = icg_dist.loc[tag,icg_dist.columns]
-    icg_log_df.to_excel(icg_log_path)
+    save(ICG_Input.join(icg_dist),icg_log_path)
 #==================================================
 # C620 INPUT
 st.subheader('(C620)請填入以下數值')
@@ -81,11 +74,8 @@ if st.button('C620預測'):
     st.write(c620_wt)
     st.subheader('C620_op輸出值為：')
     st.write(c620_op)
-    # combined wt op results
-    c620_output = c620_wt.join(c620_op)
-    c620_log_df.loc[tag,C620_Input.columns] = C620_Input.loc[tag,C620_Input.columns]
-    c620_log_df.loc[tag,c620_output.columns] = c620_output.loc[tag,c620_output.columns]
-    c620_log_df.to_excel(c620_log_path)
+    # save
+    save(C620_Input.join(c620_wt).join(c620_op),c620_log_path)
 #==================================================
 # C660 INPUT
 st.subheader('(C660)請填入以下數值')
@@ -106,11 +96,8 @@ if st.button('C660預測'):
     st.write(c660_wt)
     st.subheader('C660_op輸出值為：')
     st.write(c660_op)
-    # combined wt op results
-    c660_output = c660_wt.join(c660_op)
-    c660_log_df.loc[tag,C660_Input.columns] = C660_Input.loc[tag,C660_Input.columns]
-    c660_log_df.loc[tag,c660_output.columns] = c660_output.loc[tag,c660_output.columns]
-    c660_log_df.to_excel(c660_log_path)
+    # save
+    save(C660_Input.join(c660_wt).join(c660_op),c660_log_path)
 #==================================================
 # C670 INPUT
 st.subheader('(C670)請填入以下數值')
@@ -131,9 +118,6 @@ if st.button('C670預測'):
     st.write(c670_wt)
     st.subheader('C670_op輸出值為：')
     st.write(c670_op)
-    # combined wt op results
-    c670_output = c670_wt.join(c670_op)
-    c670_log_df.loc[tag,C670_Input.columns] = C670_Input.loc[tag,C670_Input.columns]
-    c670_log_df.loc[tag,c670_output.columns] = c670_output.loc[tag,c670_output.columns]
-    c670_log_df.to_excel(c670_log_path)
+    # save
+    save(C670_Input.join(c670_wt).join(c670_op),c670_log_path)
 #==================================================
