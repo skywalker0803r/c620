@@ -9,13 +9,13 @@ from config import config
 # load
 model_icg = joblib.load('model/c620_icg.pkl')
 
+# functions
 def save(row,log_path):
-    log_df = pd.read_excel(log_path,index_col=0)
-    if len(log_df) != 0:
-        log_df = log_df.append(row)
-    else:
-        log_df = row
-    log_df.to_excel(log_path)
+    try:
+        log_df = pd.read_excel(log_path,index_col=0)
+        log_df.append(row).to_excel(log_path)
+    except:
+        row.to_excel(log_path)
 
 def show_progress():
     my_bar = st.progress(0)

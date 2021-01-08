@@ -9,12 +9,11 @@ from config import config
 
 # functions
 def save(row,log_path):
-    log_df = pd.read_excel(log_path,index_col=0)
-    if len(log_df) != 0:
-        log_df = log_df.append(row)
-    else:
-        log_df = row
-    log_df.to_excel(log_path)
+    try:
+        log_df = pd.read_excel(log_path,index_col=0)
+        log_df.append(row).to_excel(log_path)
+    except:
+        row.to_excel(log_path)
 
 def show_progress():
     my_bar = st.progress(0)
@@ -50,16 +49,16 @@ st.subheader('給這一次試算一個tag吧')
 tag = st.text_input('輸入tag')
 if st.button('確定'):
     st.write('tag名稱為:{}'.format(tag))
-    # setting tag 
-    c620_case.index = [tag]
-    c620_feed.index = [tag]
-    t651_feed.index = [tag]
-    t651_mf.index = [tag]
-    c620_mf_side.index = [tag]
-    c660_case.index = [tag]
-    c620_mf_bot.index = [tag]
-    c660_mf_bot.index = [tag]
-    c670_bf.index = [tag]
+# setting tag 
+c620_case.index = [tag]
+c620_feed.index = [tag]
+t651_feed.index = [tag]
+t651_mf.index = [tag]
+c620_mf_side.index = [tag]
+c660_case.index = [tag]
+c620_mf_bot.index = [tag]
+c660_mf_bot.index = [tag]
+c670_bf.index = [tag]
 
 # USER INPUT ALL
 let_user_input("C620_CASE",c620_case)
@@ -73,19 +72,40 @@ let_user_input("C660_MF_BOT",c660_mf_bot)
 let_user_input("C670_BF",c670_bf)
 
 if st.button('Prediction'):
+    show_progress()
+    # f input
     c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(c620_case,c620_feed,t651_feed,t651_mf,c620_mf_side,c660_case,c620_mf_bot,c660_mf_bot,c670_bf)
+    save(
+        c620_case.join(
+        c620_feed).join(
+        t651_feed).join(
+        t651_mf).join(
+        c620_mf_side).join(
+        c660_case).join(
+        c620_mf_bot).join(
+        c660_mf_bot).join(
+        c670_bf),config['f_input_log_path'])
     
+    # c620 output
     st.subheader('C620_wt')
     st.write(c620_wt)
     st.subheader('C620_op')
     st.write(c620_op)
+    save(c620_wt,config['c620_wt_log_path'])
+    save(c620_op,config['c620_op_log_path'])
 
+    # c660 output
     st.subheader('C660_wt')
     st.write(c660_wt)
     st.subheader('C660_op')
     st.write(c660_op)
+    save(c660_wt,config['c660_wt_log_path'])
+    save(c660_op,config['c660_op_log_path'])
 
+    # c670 output
     st.subheader('C670_wt')
     st.write(c670_wt)
     st.subheader('C670_op')
     st.write(c670_op)
+    save(c670_wt,config['c670_wt_log_path'])
+    save(c670_op,config['c670_op_log_path'])
