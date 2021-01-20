@@ -43,4 +43,5 @@ streamlit run web_f.py
 
 ICG|F
 :-------------------------:|:-------------------------:
-![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_LunarLander-v2.gif) |  ![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_BipedalWalker-v2.gif)
+![](https://github.com/skywalker0803r/c620/blob/main/gif/ICG_web.gif)|![](https://github.com/skywalker0803r/c620/blob/main/gif/F_web.gif)
+
