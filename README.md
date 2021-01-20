@@ -45,3 +45,10 @@ ICG|F
 :-------------------------:|:-------------------------:
 ![](https://github.com/skywalker0803r/c620/blob/main/gif/ICG_web.gif)|![](https://github.com/skywalker0803r/c620/blob/main/gif/F_web.gif)
 
+## 試算結果自動保存功能
+
+在c620專案目錄底下有一個log資料夾,裡面存放試算完的結果
+![](https://github.com/skywalker0803r/c620/blob/main/img/logdir.png)
+
+以c620_wt_log.xlsx為範例打開來裡面內容如下
+![](https://github.com/skywalker0803r/c620/blob/main/img/c620_wt_log.png)
