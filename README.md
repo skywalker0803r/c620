@@ -34,7 +34,13 @@ pip install -r requirements.txt
 ```
 streamlit run web_icg.py
 ```
-輸入以下指令打開c620_c660_c670試算網頁
+輸入以下指令打開c620_c660_c670(簡稱F)試算網頁
 ```
 streamlit run web_f.py
 ```
+
+##Demo
+
+ICG|F
+:-------------------------:|:-------------------------:
+![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_LunarLander-v2.gif) |  ![](https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/gif/PPO_BipedalWalker-v2.gif)
