@@ -14,4 +14,4 @@ tqdm==4.42.1
 torch==1.4.0+cpu
 
 # install robust_loss_pytorch
--e git://github.com/jonbarron/robust_loss_pytorch
+-e git://github.com/jonbarron/robust_loss_pytorch.git
