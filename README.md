@@ -39,7 +39,7 @@ streamlit run web_icg.py
 streamlit run web_f.py
 ```
 
-##Demo
+## Demo
 
 ICG|F
 :-------------------------:|:-------------------------:
