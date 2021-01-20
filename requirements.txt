@@ -7,5 +7,11 @@ scikit-learn==0.22.1
 scipy==1.4.1
 seaborn==0.10.0
 streamlit==0.58.0
-torch==1.4.0
 tqdm==4.42.1
+
+# install pytorch
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==1.4.0+cpu
+
+# install robust_loss_pytorch
+-e git://github.com/jonbarron/robust_loss_pytorch
