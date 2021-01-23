@@ -31,60 +31,37 @@ def let_user_input(title,default_input):
 
 # get F module
 f = F(config)
+f.Recommended_mode = True
 
 # get demo data
 demo = joblib.load('./data/demo.pkl')
-c620_case = demo['c620_case']
-c620_feed = demo['c620_feed']
-t651_feed = demo['t651_feed']
-t651_mf = demo['t651_mf'].to_frame()
-c620_mf_side = demo['c620_mf_side'].to_frame()
-c660_case = demo['c660_case']
-c620_mf_bot = demo['c620_mf_bot'].to_frame()
-c660_mf_bot = demo['c660_mf_bot'].to_frame()
-c670_bf = demo['c670_bf']
+icg_input = demo['icg_input'].to_frame().T
+c620_Receiver_Temp = demo['c620_Receiver_Temp'].to_frame().T
+c620_feed = demo['c620_feed'].to_frame().T
+t651_feed = demo['t651_feedf'].to_frame().T
 
 # USER NEED INPUT TAG
 st.subheader('給這一次試算一個tag吧')
 tag = st.text_input('輸入tag')
 if st.button('確定'):
     st.write('tag名稱為:{}'.format(tag))
+
 # setting tag 
-c620_case.index = [tag]
+icg_input.index = [tag]
+c620_Receiver_Temp.index = [tag]
 c620_feed.index = [tag]
 t651_feed.index = [tag]
-t651_mf.index = [tag]
-c620_mf_side.index = [tag]
-c660_case.index = [tag]
-c620_mf_bot.index = [tag]
-c660_mf_bot.index = [tag]
-c670_bf.index = [tag]
 
 # USER INPUT ALL
-let_user_input("C620_CASE",c620_case)
-let_user_input("C620_FEED",c620_feed)
-let_user_input("T651_FEED",t651_feed)
-let_user_input("T651_MF",t651_mf)
-let_user_input("C620_MF_SIDE",c620_mf_side)
-let_user_input("C660_CASE",c660_case)
-let_user_input("C620_MF_BOT",c620_mf_bot)
-let_user_input("C660_MF_BOT",c660_mf_bot)
-let_user_input("C670_BF",c670_bf)
+let_user_input("ICG_INPUT",icg_input)
+let_user_input("C620_Receiver_Temp",c620_Receiver_Temp)
+let_user_input("C620_feed",c620_feed)
+let_user_input("T651_feed",t651_feed)
 
 if st.button('Prediction'):
     show_progress()
-    # f input
-    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(c620_case,c620_feed,t651_feed,t651_mf,c620_mf_side,c660_case,c620_mf_bot,c660_mf_bot,c670_bf)
-    save(
-        c620_case.join(
-        c620_feed).join(
-        t651_feed).join(
-        t651_mf).join(
-        c620_mf_side).join(
-        c660_case).join(
-        c620_mf_bot).join(
-        c660_mf_bot).join(
-        c670_bf),config['f_input_log_path'])
+    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+    save(icg_input.join(c620_Receiver_Temp).join(c620_feed).join(t651_feed),config['input_log_path'])
     
     # c620 output
     st.subheader('C620_wt')
