@@ -30,23 +30,14 @@ pip install -r requirements.txt
 
 ## Usage
 
-輸入以下指令打開ICG試算網頁
+輸入以下指令打開試算網頁
 ```
-streamlit run web_icg.py
+streamlit run web.py
 ```
-輸入以下指令打開c620_c660_c670(簡稱F)試算網頁
-```
-streamlit run web_f.py
-```
-## Waht is the F?
 
-簡單來說ICG後面的部份可以定義清楚 哪些是使用者需要輸入的(X) 哪些是使用者想要看到的(Y)
+## 流程圖
 
-![](https://github.com/skywalker0803r/c620/blob/main/img/c620_overview.png)
-
-定義清楚後就可以打包成一個模組這裡就簡稱F
-
-![](https://github.com/skywalker0803r/c620/blob/main/img/c620_overview_sample.png)
+![](https://github.com/skywalker0803r/c620/blob/main/img/overview.png)
 
 
 ## Demo
