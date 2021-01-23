@@ -12,8 +12,8 @@ config = {
       'c670_col_path':'col_names/c670_col_names.pkl',
           
       # Special column (0.9999 & 0.0001)
-      'index_9999_path':'other/index_9999.pkl',
-      'index_0001_path':'other/index_0001.pkl',
+      'index_9999_path':'data/index_9999.pkl',
+      'index_0001_path':'data/index_0001.pkl',
           
       # input log Excel file
        'input_log_path':'log/input_log.xlsx',
