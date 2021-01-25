@@ -38,7 +38,7 @@ demo = joblib.load('./data/demo.pkl')
 icg_input = demo['icg_input'].to_frame().T
 c620_Receiver_Temp = demo['c620_Receiver_Temp'].to_frame().T
 c620_feed = demo['c620_feed'].to_frame().T
-t651_feed = demo['t651_feedf'].to_frame().T
+t651_feed = demo['t651_feed'].to_frame().T
 
 # USER NEED INPUT TAG
 st.subheader('給這一次試算一個tag吧')
