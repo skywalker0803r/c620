@@ -16,7 +16,7 @@ conda activate c620_env
 ```
 3.使用git指令下載整個c620專案資料夾
 ```
-https://github.com/skywalker0803r/c620.git
+git clone https://github.com/skywalker0803r/c620.git
 ```
 4.切換目錄到c620資料夾底下
 ```
