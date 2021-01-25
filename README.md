@@ -42,9 +42,9 @@ streamlit run web.py
 
 ## Demo
 
-ICG|F
-:-------------------------:|:-------------------------:
-![](https://github.com/skywalker0803r/c620/blob/main/gif/ICG_web.gif)|![](https://github.com/skywalker0803r/c620/blob/main/gif/F_web.gif)
+web.py
+:-------------------------:
+![](https://github.com/skywalker0803r/c620/blob/main/gif/web.gif)
 
 ## 試算結果自動保存功能
 
