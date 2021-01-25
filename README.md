@@ -52,4 +52,4 @@ web.py
 ![](https://github.com/skywalker0803r/c620/blob/main/img/log_dir.png)
 
 以c620_wt_log.xlsx為範例打開來裡面內容如下
-![](https://github.com/skywalker0803r/c620/blob/main/img/c620_wt_log.png)
+![](https://github.com/skywalker0803r/c620/blob/main/img/c620wt_log.png)
