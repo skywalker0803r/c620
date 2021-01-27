@@ -31,7 +31,10 @@ def let_user_input(title,default_input):
 
 # get F module
 f = F(config)
-f.Recommended_mode = True
+
+# select mode
+mode = st.radio("您想試算還是推薦？",('推薦', '試算'))
+f.Recommended_mode = bool(mode == '推薦')
 
 # get demo data
 demo = joblib.load('./data/demo.pkl')
@@ -58,9 +61,20 @@ let_user_input("C620_Receiver_Temp",c620_Receiver_Temp)
 let_user_input("C620_feed",c620_feed)
 let_user_input("T651_feed",t651_feed)
 
+if f.Recommended_mode == False:
+    st.subheader('{} 請填入以下數值'.format('C620_Dist_Rate'))
+    c620_dist_rate = st.number_input('C620_Dist_Rate',value = 0.01,step=1e-8,format='%.4f')
+
 if st.button('Prediction'):
     show_progress()
-    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+    
+    if f.Recommended_mode == True:
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+    
+    if f.Recommended_mode == False:
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,{'c620_case_Distillate_Rate':c620_dist_rate})
+    
+    # save input
     save(icg_input.join(c620_Receiver_Temp).join(c620_feed).join(t651_feed),config['input_log_path'])
     
     # c620 output

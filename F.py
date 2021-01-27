@@ -29,11 +29,12 @@ class F(object):
       output = self.icg_model.predict(Input)
       dist_rate = output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0]
       na_in_benzene = Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
-      print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{} so NA in Benzene_ppmw -= 30'.format(dist_rate,na_in_benzene))
+      print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{}'.format(dist_rate,na_in_benzene))
       if dist_rate > 0:
         return output,Input
       else:
         Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] -= 30
+        print('NA in Benzene_ppmw -= 30')
   
   def __call__(self,icg_input,c620_Receiver_Temp,c620_feed,t651_feed,other_args={}):
     # get index
