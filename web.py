@@ -20,7 +20,7 @@ def show_progress():
     for percent_complete in range(100):
         time.sleep(0.01)
         my_bar.progress(percent_complete + 1)
-    st.balloons()
+    #st.balloons()
 
 def let_user_input(title,default_input):
     st.subheader('{} 請填入以下數值'.format(title))
@@ -42,6 +42,7 @@ icg_input = demo['icg_input'].to_frame().T
 c620_Receiver_Temp = demo['c620_Receiver_Temp'].to_frame().T
 c620_feed = demo['c620_feed'].to_frame().T
 t651_feed = demo['t651_feed'].to_frame().T
+c620_dist_rate = demo['c620_case_Distillate_Rate'].to_frame().T
 
 # USER NEED INPUT TAG
 st.subheader('給這一次試算一個tag吧')
@@ -62,8 +63,7 @@ let_user_input("C620_feed",c620_feed)
 let_user_input("T651_feed",t651_feed)
 
 if f.Recommended_mode == False:
-    st.subheader('{} 請填入以下數值'.format('C620_Dist_Rate'))
-    c620_dist_rate = st.number_input('C620_Dist_Rate',value = 0.01,step=1e-8,format='%.4f')
+    let_user_input("C620_Dist_Rate",c620_dist_rate)
 
 if st.button('Prediction'):
     show_progress()
