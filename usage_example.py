@@ -13,6 +13,7 @@ if __name__ == '__main__':
     c620_Receiver_Temp = demo['c620_Receiver_Temp'].to_frame().T
     c620_feed = demo['c620_feed'].to_frame().T
     t651_feed = demo['t651_feed'].to_frame().T
+    c620_dist_rate = demo['c620_case_Distillate_Rate'].to_frame().T
 
     # instance f
     f = F(config)
@@ -23,7 +24,8 @@ if __name__ == '__main__':
         c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
     
     if f.Recommended_mode == False:
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,{'c620_case_Distillate_Rate':0.01})
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,
+        {'c620_case_Distillate_Rate':c620_dist_rate})
     
     # print(input and output)
     print('icg_input',icg_input)

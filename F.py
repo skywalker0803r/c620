@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import autorch
 from autorch.function import sp2wt
 
+
 class F(object):
   def __init__(self,config):
     self.icg_model = joblib.load(config['icg_model_path'])
@@ -49,7 +50,7 @@ class F(object):
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_output.values
     
     if self.Recommended_mode == False:
-      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = other_args['c620_case_Distillate_Rate']
+      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = other_args['c620_case_Distillate_Rate'].values
     
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     c620_input = c620_case.join(c620_feed)
