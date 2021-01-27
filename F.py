@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import autorch
 from autorch.function import sp2wt
 
-
 class F(object):
   def __init__(self,config):
     self.icg_model = joblib.load(config['icg_model_path'])
@@ -87,7 +86,10 @@ class F(object):
     c660_feed = pd.DataFrame(c660_feed,index=idx,columns=self.c660_col['x41'])
     c660_case = pd.DataFrame(index=idx,columns=self.c660_col['case'])
     c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values
-    c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
+    if self.Recommended_mode == True:
+      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
+    if self.Recommended_mode == False:
+      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = other_args['c660_case_Toluene_in_Benzene_ppmw'].values
     c660_input = c660_case.join(c660_feed)
     
     # c660 output(op&wt)

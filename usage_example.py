@@ -9,11 +9,13 @@ if __name__ == '__main__':
     
     # load data
     demo = joblib.load('./data/demo.pkl')
-    icg_input = demo['icg_input'].to_frame().T
-    c620_Receiver_Temp = demo['c620_Receiver_Temp'].to_frame().T
-    c620_feed = demo['c620_feed'].to_frame().T
-    t651_feed = demo['t651_feed'].to_frame().T
-    c620_dist_rate = demo['c620_case_Distillate_Rate'].to_frame().T
+    print(demo.keys())
+    icg_input = demo['icg_input']
+    c620_Receiver_Temp = demo['c620_Receiver_Temp']
+    c620_feed = demo['c620_feed']
+    t651_feed = demo['t651_feed']
+    c620_dist_rate = demo['c620_case_Distillate_Rate']
+    c660_case_Toluene_in_Benzene_ppmw = demo['c660_case_Toluene_in_Benzene_ppmw']
 
     # instance f
     f = F(config)
@@ -24,8 +26,11 @@ if __name__ == '__main__':
         c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
     
     if f.Recommended_mode == False:
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,
-        {'c620_case_Distillate_Rate':c620_dist_rate})
+        other_args =  {
+            'c620_case_Distillate_Rate':c620_dist_rate,
+            'c660_case_Toluene_in_Benzene_ppmw':c660_case_Toluene_in_Benzene_ppmw,
+            }
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,other_args)
     
     # print(input and output)
     print('icg_input',icg_input)
@@ -38,5 +43,5 @@ if __name__ == '__main__':
     print('c660_op',c660_op)
     print('c670_wt',c670_wt)
     print('c670_op',c670_op)
-    print('mode = ',f.Recommended_mode)
+    print('Recommended_mode = ',f.Recommended_mode)
     print('test ok !')
