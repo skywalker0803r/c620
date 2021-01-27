@@ -6,13 +6,15 @@ import time
 import os
 from F import F
 from config import config
+import xlrd
 
 # functions
 def save(row,log_path):
     try:
-        log_df = pd.read_excel(log_path,index_col=0)
+        log_df = pd.read_excel(log_path,index_col=0,engine='openpyxl')
         log_df.append(row).to_excel(log_path)
-    except:
+    except Exception as e:
+        print(e)
         row.to_excel(log_path)
 
 def show_progress():
