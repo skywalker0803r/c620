@@ -16,10 +16,14 @@ if __name__ == '__main__':
 
     # instance f
     f = F(config)
-    f.Recommended_mode = True
+    f.Recommended_mode = False #(True or False)
     
     # call f
-    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+    if f.Recommended_mode == True:
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+    
+    if f.Recommended_mode == False:
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,{'c620_case_Distillate_Rate':0.01})
     
     # print(input and output)
     print('icg_input',icg_input)
@@ -32,3 +36,5 @@ if __name__ == '__main__':
     print('c660_op',c660_op)
     print('c670_wt',c670_wt)
     print('c670_op',c670_op)
+    print('mode = ',f.Recommended_mode)
+    print('test ok !')
