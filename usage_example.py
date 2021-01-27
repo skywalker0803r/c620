@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     # instance f
     f = F(config)
-    f.Recommended_mode = False #(True or False)
+    f.Recommended_mode = True #(True or False)
     
     # call f
     if f.Recommended_mode == True:
