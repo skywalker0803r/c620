@@ -26,7 +26,7 @@ class F(object):
 
   def ICG_loop(self,Input):
     while True:
-      output = self.icg_model.predict(Input)
+      output = self.icg_model.predict(Input[self.icg_model.x_col])
       dist_rate = output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0]
       na_in_benzene = Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
       print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{}'.format(dist_rate,na_in_benzene))
@@ -36,20 +36,20 @@ class F(object):
         Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] -= 30
         print('NA in Benzene_ppmw -= 30')
   
-  def __call__(self,icg_input,c620_Receiver_Temp,c620_feed,t651_feed,other_args={}):
+  def __call__(self,icg_input,c620_feed,t651_feed):
     # get index
     idx = icg_input.index
 
     # c620 input(case&feed)
     c620_case = pd.DataFrame(index=idx,columns=self.c620_col['case'])
-    c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'] = c620_Receiver_Temp.values
+    c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'].values
     
     if self.Recommended_mode == True:
       icg_output,icg_input = self.ICG_loop(icg_input)
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_output.values
     
     if self.Recommended_mode == False:
-      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = other_args['c620_case_Distillate_Rate'].values
+      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values
     
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     c620_input = c620_case.join(c620_feed)
@@ -89,7 +89,7 @@ class F(object):
     if self.Recommended_mode == True:
       c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
     if self.Recommended_mode == False:
-      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = other_args['c660_case_Toluene_in_Benzene_ppmw'].values
+      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values
     c660_input = c660_case.join(c660_feed)
     
     # c660 output(op&wt)
