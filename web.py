@@ -41,11 +41,8 @@ f.Recommended_mode = bool(mode == '推薦')
 # get demo data
 demo = joblib.load('./data/demo.pkl')
 icg_input = demo['icg_input']
-c620_Receiver_Temp = demo['c620_Receiver_Temp']
 c620_feed = demo['c620_feed']
 t651_feed = demo['t651_feed']
-c620_dist_rate = demo['c620_case_Distillate_Rate']
-c660_case_Toluene_in_Benzene_ppmw = demo['c660_case_Toluene_in_Benzene_ppmw']
 
 # USER NEED INPUT TAG
 st.subheader('給這一次試算一個tag吧')
@@ -55,37 +52,20 @@ if st.button('確定'):
 
 # setting tag 
 icg_input.index = [tag]
-c620_Receiver_Temp.index = [tag]
 c620_feed.index = [tag]
 t651_feed.index = [tag]
-c620_dist_rate.index = [tag]
-c660_case_Toluene_in_Benzene_ppmw.index = [tag]
 
 # USER INPUT ALL
 let_user_input("ICG_INPUT",icg_input)
-let_user_input("C620_Receiver_Temp",c620_Receiver_Temp)
 let_user_input("C620_feed",c620_feed)
 let_user_input("T651_feed",t651_feed)
 
-if f.Recommended_mode == False:
-    let_user_input("C620_Dist_Rate",c620_dist_rate)
-    let_user_input("C660_Case_Toluene_in_Benzene_ppmw",c660_case_Toluene_in_Benzene_ppmw)
-
 if st.button('Prediction'):
     show_progress()
-    
-    if f.Recommended_mode == True:
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
-    
-    if f.Recommended_mode == False:
-        other_args = {
-            'c620_case_Distillate_Rate':c620_dist_rate,
-            'c660_case_Toluene_in_Benzene_ppmw':c660_case_Toluene_in_Benzene_ppmw,
-        }
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed,other_args)
+    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_feed,t651_feed)
     
     # save input
-    save(icg_input.join(c620_Receiver_Temp).join(c620_feed).join(t651_feed),config['input_log_path'])
+    save(icg_input.join(c620_feed).join(t651_feed),config['input_log_path'])
     
     # c620 output
     st.subheader('C620_wt')

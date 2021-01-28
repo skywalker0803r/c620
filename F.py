@@ -26,11 +26,11 @@ class F(object):
 
   def ICG_loop(self,Input):
     while True:
-      output = self.icg_model.predict(Input[self.icg_model.x_col])
+      output = pd.DataFrame(self.icg_model.predict(Input[self.icg_col['x']].values),index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
       dist_rate = output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0]
       na_in_benzene = Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
       print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{}'.format(dist_rate,na_in_benzene))
-      if dist_rate > 0:
+      if output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0] > 0:
         return output,Input
       else:
         Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] -= 30

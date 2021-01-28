@@ -1,6 +1,6 @@
 config = {
       # model
-      'icg_model_path':'model/c620_icg.pkl',
+      'icg_model_path':'model/c620_icg_svr.pkl',
       'c620_model_path':'model/c620.pkl',
       'c660_model_path':'model/c660.pkl',
       'c670_model_path':'model/c670.pkl',
