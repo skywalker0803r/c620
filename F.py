@@ -40,19 +40,24 @@ class F(object):
     # get index
     idx = icg_input.index
 
-    # c620 input(case&feed)
+    # c620_case 
     c620_case = pd.DataFrame(index=idx,columns=self.c620_col['case'])
+
+    # c620_case(Receiver Temp_oC) = user input
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'].values
     
     if self.Recommended_mode == True:
+      icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980.0 
+      icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70.0
       icg_output,icg_input = self.ICG_loop(icg_input)
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_output.values
-      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = 70 # because Recommended_mode == True
+      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     
     if self.Recommended_mode == False:
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     
+    # c620_input(c620_case&c620_feed)
     c620_input = c620_case.join(c620_feed)
     
     # c620 output(op&wt)
@@ -86,13 +91,14 @@ class F(object):
     c660_feed = c620_wt[self.c620_col['sidedraw_x']].values*c620_mf_side_p + t651_feed.values*t651_mf_p
     c660_feed = pd.DataFrame(c660_feed,index=idx,columns=self.c660_col['x41'])
     c660_case = pd.DataFrame(index=idx,columns=self.c660_col['case'])
+    c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values
     
     if self.Recommended_mode == True:
-      c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = 980 # because Recommended_mode == True
-      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10 #because Recommended_mode == True
+      # fix Toluene in Benzene_ppmw = 10
+      c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10.0
     
     if self.Recommended_mode == False:
-      c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values
+      # Toluene in Benzene_ppmw = user input
       c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values
     
     c660_input = c660_case.join(c660_feed)
