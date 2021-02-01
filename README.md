@@ -51,7 +51,7 @@ c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp
 
 web.py
 :-------------------------:
-![](https://github.com/skywalker0803r/c620/blob/main/gif/web.gif)
+![](https://github.com/skywalker0803r/c620/blob/main/gif/web_2.gif)
 
 ## 試算結果自動保存功能
 
