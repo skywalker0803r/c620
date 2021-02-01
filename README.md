@@ -41,7 +41,7 @@ streamlit run web.py
 
 ## 流程圖封裝 調用只須一行
 ```
-c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_Receiver_Temp,c620_feed,t651_feed)
+c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_feed,t651_feed)
 ```
 ![](https://github.com/skywalker0803r/c620/blob/main/img/F.png)
 
