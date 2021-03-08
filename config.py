@@ -1,10 +1,16 @@
 config = {
-      # model
+      # model path
       'icg_model_path':'model/c620_icg_svr.pkl',
       'c620_model_path':'model/c620.pkl',
       'c660_model_path':'model/c660.pkl',
       'c670_model_path':'model/c670.pkl',
-      
+
+      # real data model path
+      'icg_model_path_real_data':'model/c620_icg_svr_real_data.pkl',
+      'c620_model_path_real_data':'model/c620_op_real_data.pkl',
+      'c660_model_path_real_data':'model/c660_op_real_data.pkl',
+      'c670_model_path_real_data':'model/c670_op_real_data.pkl',
+
       # col_names
       'icg_col_path':'col_names/c620_c670.pkl',
       'c620_col_path':'col_names/c620_col_names.pkl',
