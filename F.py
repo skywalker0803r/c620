@@ -8,10 +8,19 @@ from autorch.function import sp2wt
 
 class F(object):
   def __init__(self,config):
+    # simulation data model
     self.icg_model = joblib.load(config['icg_model_path'])
     self.c620_model = joblib.load(config['c620_model_path'])
     self.c660_model = joblib.load(config['c660_model_path'])
     self.c670_model = joblib.load(config['c670_model_path'])
+    
+    # real data model
+    self.icg_real_data_model = joblib.load(config['icg_model_path_real_data'])
+    self.c620_real_data_model = joblib.load(config['c620_model_path_real_data'])
+    self.c660_real_data_model = joblib.load(config['c660_model_path_real_data'])
+    self.c670_real_data_model = joblib.load(config['c670_model_path_real_data'])
+    
+    # columns name
     self.icg_col = joblib.load(config['icg_col_path'])
     self.c620_col = joblib.load(config['c620_col_path'])
     self.c660_col = joblib.load(config['c660_col_path'])
@@ -26,7 +35,8 @@ class F(object):
 
   def ICG_loop(self,Input):
     while True:
-      output = pd.DataFrame(self.icg_model.predict(Input[self.icg_col['x']].values),index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
+      output = pd.DataFrame(self.icg_real_data_model.predict(Input[self.icg_col['x']].values), # use icg real data model
+      index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
       dist_rate = output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0]
       na_in_benzene = Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
       print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{}'.format(dist_rate,na_in_benzene))
@@ -64,6 +74,11 @@ class F(object):
     c620_input = c620_case.join(c620_feed)
     c620_output = self.c620_model.predict(c620_input)
     c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
+    
+    # update by c620 real data model
+    c620_op_real = self.c620_real_data_model.predict(c620_input)
+    c620_op.update(c620_op_real)
+    
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
     w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
     wt = np.hstack((w1,w2,w3,w4))
@@ -106,6 +121,11 @@ class F(object):
     # c660 output(op&wt)
     c660_output = self.c660_model.predict(c660_input)
     c660_sp,c660_op = c660_output.iloc[:,:41*4],c660_output.iloc[:,41*4:]
+
+    # update by c660 real data model
+    c660_op_real = self.c660_real_data_model.predict(c660_input)
+    c660_op.update(c660_op_real)
+    
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
     w1,w2,w3,w4 = sp2wt(c660_feed,s1),sp2wt(c660_feed,s2),sp2wt(c660_feed,s3),sp2wt(c660_feed,s4)
     wt = np.hstack((w1,w2,w3,w4))
@@ -134,6 +154,11 @@ class F(object):
     c670_input = c670_feed.join(upper_bf)
     c670_output = self.c670_model.predict(c670_input)
     c670_sf,c670_op = c670_output.iloc[:,:41*2],c670_output.iloc[:,41*2:]
+
+    # update by c670 real data model
+    c670_op_real = self.c670_real_data_model.predict(c670_input)
+    c670_op.update(c670_op_real)
+    
     s1 = c670_sf[self.c670_col['distillate_sf']].values
     s2 = c670_sf[self.c670_col['bottoms_sf']].values
     w1 = sp2wt(c670_feed,s1)
