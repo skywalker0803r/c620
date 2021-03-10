@@ -31,12 +31,17 @@ class F(object):
     self.C820_density = 0.8731
     self.T651_density = 0.8749
     self.Recommended_mode = False
+    self.real_data_mode = False
 
 
   def ICG_loop(self,Input):
     while True:
-      output = pd.DataFrame(self.icg_real_data_model.predict(Input[self.icg_col['x']].values), # use icg real data model
-      index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
+      if self.real_data_mode == True:
+        output = pd.DataFrame(self.icg_real_data_model.predict(Input[self.icg_col['x']].values),
+        index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
+      if self.real_data_mode == False:
+        output = pd.DataFrame(self.icg_model.predict(Input[self.icg_col['x']].values),
+        index=Input.index,columns=['Simulation Case Conditions_C620 Distillate Rate_m3/hr'])
       dist_rate = output['Simulation Case Conditions_C620 Distillate Rate_m3/hr'].values[0]
       na_in_benzene = Input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
       print('current Distillate Rate_m3/hr:{} NA in Benzene_ppmw:{}'.format(dist_rate,na_in_benzene))
@@ -76,8 +81,9 @@ class F(object):
     c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
     
     # update by c620 real data model
-    c620_op_real = self.c620_real_data_model.predict(c620_input)
-    c620_op.update(c620_op_real)
+    if self.real_data_mode == True:
+      c620_op_real = self.c620_real_data_model.predict(c620_input)
+      c620_op.update(c620_op_real)
     
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
     w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
@@ -123,8 +129,9 @@ class F(object):
     c660_sp,c660_op = c660_output.iloc[:,:41*4],c660_output.iloc[:,41*4:]
 
     # update by c660 real data model
-    c660_op_real = self.c660_real_data_model.predict(c660_input)
-    c660_op.update(c660_op_real)
+    if self.real_data_mode == True:
+      c660_op_real = self.c660_real_data_model.predict(c660_input)
+      c660_op.update(c660_op_real)
     
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
     w1,w2,w3,w4 = sp2wt(c660_feed,s1),sp2wt(c660_feed,s2),sp2wt(c660_feed,s3),sp2wt(c660_feed,s4)
@@ -156,8 +163,9 @@ class F(object):
     c670_sf,c670_op = c670_output.iloc[:,:41*2],c670_output.iloc[:,41*2:]
 
     # update by c670 real data model
-    c670_op_real = self.c670_real_data_model.predict(c670_input)
-    c670_op.update(c670_op_real)
+    if self.real_data_mode == True:
+      c670_op_real = self.c670_real_data_model.predict(c670_input)
+      c670_op.update(c670_op_real)
     
     s1 = c670_sf[self.c670_col['distillate_sf']].values
     s2 = c670_sf[self.c670_col['bottoms_sf']].values
