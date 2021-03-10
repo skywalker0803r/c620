@@ -38,11 +38,23 @@ f = F(config)
 mode = st.radio("您想試算還是推薦？",('推薦', '試算'))
 f.Recommended_mode = bool(mode == '推薦')
 
+data_mode = st.radio("模擬數據還是現場數據？",('模擬', '現場'))
+f.real_data_mode = bool(mode == '現場')
+
 # get demo data
-demo = joblib.load('./data/demo.pkl')
-icg_input = demo['icg_input']
-c620_feed = demo['c620_feed']
-t651_feed = demo['t651_feed']
+if f.real_data_mode == False:
+    demo = joblib.load('./data/demo.pkl')
+    icg_input = demo['icg_input']
+    c620_feed = demo['c620_feed']
+    t651_feed = demo['t651_feed']
+
+if f.real_data_mode == True:
+    demo = joblib.load('./data/demo(real_data).pkl')
+    idx = icg_input.index[0]
+    icg_input = demo['icg_input'].loc[[idx]]
+    c620_feed = demo['c620_feed'].loc[[idx]]
+    t651_feed = demo['t651_feed'].loc[[idx]]
+    
 
 # USER NEED INPUT TAG
 st.subheader('給這一次試算一個tag吧')
