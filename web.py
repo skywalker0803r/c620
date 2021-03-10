@@ -42,15 +42,15 @@ data_mode = st.radio("模擬數據還是現場數據？",('模擬', '現場'))
 f.real_data_mode = bool(mode == '現場')
 
 # get demo data
-if f.real_data_mode == False:
+if data_mode == '模擬':
     demo = joblib.load('./data/demo.pkl')
     icg_input = demo['icg_input']
     c620_feed = demo['c620_feed']
     t651_feed = demo['t651_feed']
 
-if f.real_data_mode == True:
+if data_mode == '現場':
     demo = joblib.load('./data/demo(real_data).pkl')
-    idx = icg_input.index[0]
+    idx = demo['icg_input'].index[0]
     icg_input = demo['icg_input'].loc[[idx]]
     c620_feed = demo['c620_feed'].loc[[idx]]
     t651_feed = demo['t651_feed'].loc[[idx]]
