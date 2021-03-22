@@ -32,7 +32,6 @@ class F(object):
     self.T651_density = 0.8749
     self.Recommended_mode = False
     self.real_data_mode = False
-    self.normalize = lambda x:x/x.sum(axis=1).reshape(-1,1)
 
   def ICG_loop(self,Input):
     while True:
@@ -97,7 +96,8 @@ class F(object):
     other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
     other_total = (100 - c620_wt.iloc[:,bz_idx].values).reshape(-1,1)
     c620_wt.iloc[:,bz_idx] = c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values
-    c620_wt.iloc[:,other_idx] = self.normalize(c620_wt.iloc[:,other_idx].values)*other_total
+    c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values/
+                                 c620_wt.iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
     
     # c620 input mass flow rate m3 to ton
     V615_Btm_m3 = icg_input['Simulation Case Conditions_Feed Rate_Feed from V615 Btm_m3/hr'].values.reshape(-1,1)
@@ -153,8 +153,10 @@ class F(object):
     other_idx = list(set([*range(41)])-set(na_idx))
     na_total = (c660_input['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'].values/10000).reshape(-1,1)
     other_total = 100 - na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = self.normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = self.normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
+    c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values/
+                                                c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values.sum(axis=1).reshape(-1,1))*na_total
+    c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values/
+                                                   c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
     
     # c660 output mass flow (ton)
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True)
