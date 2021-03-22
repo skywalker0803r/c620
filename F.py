@@ -32,6 +32,26 @@ class F(object):
     self.T651_density = 0.8749
     self.Recommended_mode = False
     self.real_data_mode = False
+  
+  def normalize(x):
+      return x / x.sum(axis=1).reshape(-1,1)
+  
+  def c620_wt_post_processing(case_bz,wt_pred):  
+    bz_idx = wt_pred.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
+    other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
+    other_total = (100 - wt_pred.iloc[:,bz_idx].values).reshape(-1,1)
+    wt_pred.iloc[:,bz_idx] = case_bz.values
+    wt_pred.iloc[:,other_idx] = normalize(wt_pred.iloc[:,other_idx].values)*other_total
+    return wt_pred
+
+  def c660_wt_post_processing(na_total,wt_pred):
+    na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
+    other_idx = list(set([*range(41)])-set(na_idx))
+    na_total = (na_total.values/10000).reshape(-1,1)
+    other_total = 100 - na_total
+    wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx] = normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
+    wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx] = normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
+    return wt_pred
 
 
   def ICG_loop(self,Input):
@@ -89,6 +109,7 @@ class F(object):
     w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
     wt = np.hstack((w1,w2,w3,w4))
     c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
+    c620_wt = c620_wt_post_processing(c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'],c620_wt) # 後處理
     
     # c620 input mass flow rate m3 to ton
     V615_Btm_m3 = icg_input['Simulation Case Conditions_Feed Rate_Feed from V615 Btm_m3/hr'].values.reshape(-1,1)
@@ -137,6 +158,7 @@ class F(object):
     w1,w2,w3,w4 = sp2wt(c660_feed,s1),sp2wt(c660_feed,s2),sp2wt(c660_feed,s3),sp2wt(c660_feed,s4)
     wt = np.hstack((w1,w2,w3,w4))
     c660_wt = pd.DataFrame(wt,index=idx,columns=self.c660_col['vent_gas_x']+self.c660_col['distillate_x']+self.c660_col['sidedraw_x']+self.c660_col['bottoms_x'])
+    c660_wt = c660_wt_post_processing(c660_input['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'],c660_wt) #後處理
     
     # c660 output mass flow (ton)
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True)
