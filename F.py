@@ -33,28 +33,26 @@ class F(object):
     self.T651_density = 0.8749
     self.Recommended_mode = False
     self.real_data_mode = False
-    self.normalize = lambda x:x/x.sum(axis=1).reshape(-1,1)
-    
-    def c620_wt_post_processing(case_bz,wt_pred):  
-      bz_idx = wt_pred.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
-      other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
-      other_total = (100 - wt_pred.iloc[:,bz_idx].values).reshape(-1,1)
-      wt_pred.iloc[:,bz_idx] = case_bz.values
-      wt_pred.iloc[:,other_idx] = self.normalize(wt_pred.iloc[:,other_idx].values)*other_total
-      return wt_pred
-    
-    def c660_wt_post_processing(na_total,wt_pred):
-      na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
-      other_idx = list(set([*range(41)])-set(na_idx))
-      na_total = (na_total.values/10000).reshape(-1,1)
-      other_total = 100 - na_total
-      wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx] = self.normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
-      wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx] = self.normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
-      return wt_pred
-    
-    self.c620_wt_post_processing = c620_wt_post_processing
-    self.c660_wt_post_processing = c660_wt_post_processing
 
+  def normalize(self,x):
+    return x/x.sum(axis=1).reshape(-1,1)
+    
+  def c620_wt_post_processing(self,case_bz,wt_pred):  
+    bz_idx = wt_pred.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
+    other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
+    other_total = (100 - wt_pred.iloc[:,bz_idx].values).reshape(-1,1)
+    wt_pred.iloc[:,bz_idx] = case_bz.values
+    wt_pred.iloc[:,other_idx] = self.normalize(wt_pred.iloc[:,other_idx].values)*other_total
+    return wt_pred
+    
+  def c660_wt_post_processing(self,na_total,wt_pred):
+    na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
+    other_idx = list(set([*range(41)])-set(na_idx))
+    na_total = (na_total.values/10000).reshape(-1,1)
+    other_total = 100 - na_total
+    wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx] = self.normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
+    wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx] = self.normalize(wt_pred.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
+    return wt_pred
 
   def ICG_loop(self,Input):
     while True:
