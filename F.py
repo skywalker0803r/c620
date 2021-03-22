@@ -94,9 +94,9 @@ class F(object):
     # c620_wt 後處理
     bz_idx = c620_wt.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
     other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
+    other_total = (100 - c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values).reshape(-1,1)
     c620_wt.iloc[:,bz_idx] = c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values
-    other_total = (100 - c620_wt.iloc[:,bz_idx].values).reshape(-1,1)
-    c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values/
+    c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values /
                                  c620_wt.iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
     
     # c620 input mass flow rate m3 to ton
