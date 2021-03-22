@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import autorch
 from autorch.function import sp2wt
-from config import config
 
 class F(object):
   def __init__(self,config):
@@ -194,10 +193,3 @@ class F(object):
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
     
     return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
-
-# for test use
-if __name__ == '__main__':
-  f = F(config)
-  print(f.normalize)
-  print(f.c620_wt_post_processing)
-  print(f.c660_wt_post_processing)
