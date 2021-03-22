@@ -153,8 +153,8 @@ class F(object):
     other_idx = list(set([*range(41)])-set(na_idx))
     na_total = (c660_input['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'].values/10000).reshape(-1,1)
     other_total = 100 - na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
+    c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = self.normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values)*na_total
+    c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = self.normalize(c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values)*other_total
     
     # c660 output mass flow (ton)
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True)
