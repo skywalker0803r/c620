@@ -25,11 +25,18 @@ class F(object):
     self.c620_col = joblib.load(config['c620_col_path'])
     self.c660_col = joblib.load(config['c660_col_path'])
     self.c670_col = joblib.load(config['c670_col_path'])
+    
+    # other infomation
+    self.c620_wt_always_same_split_factor_dict = joblib.load(config['c620_wt_always_same_split_factor_dict'])
+    self.c660_wt_always_same_split_factor_dict = joblib.load(config['c660_wt_always_same_split_factor_dict'])
+    self.c670_wt_always_same_split_factor_dict = joblib.load(config['c670_wt_always_same_split_factor_dict'])
     self.index_9999 = joblib.load(config['index_9999_path'])
     self.index_0001 = joblib.load(config['index_0001_path'])
     self.V615_density = 0.8626
     self.C820_density = 0.8731
     self.T651_density = 0.8749
+    
+    # user can set two mode
     self.Recommended_mode = False
     self.real_data_mode = False
 
@@ -79,8 +86,11 @@ class F(object):
     c620_input = c620_case.join(c620_feed)
     c620_output = self.c620_model.predict(c620_input)
     c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
+    # c620 sp後處理
+    for i in self.c620_wt_always_same_split_factor_dict.keys():
+      c620_sp[i] = self.c620_wt_always_same_split_factor_dict[i]
     
-    # update by c620 real data model
+    # update by c620 real data model?
     if self.real_data_mode == True:
       c620_op_real = self.c620_real_data_model.predict(c620_input)
       c620_op.update(c620_op_real)
@@ -136,8 +146,11 @@ class F(object):
     # c660 output(op&wt)
     c660_output = self.c660_model.predict(c660_input)
     c660_sp,c660_op = c660_output.iloc[:,:41*4],c660_output.iloc[:,41*4:]
+    # c660 sp後處理
+    for i in self.c660_wt_always_same_split_factor_dict.keys():
+      c660_sp[i] = self.c660_wt_always_same_split_factor_dict[i]
 
-    # update by c660 real data model
+    # update by c660 real data model?
     if self.real_data_mode == True:
       c660_op_real = self.c660_real_data_model.predict(c660_input)
       c660_op.update(c660_op_real)
@@ -180,15 +193,18 @@ class F(object):
     # c670 input (feed%bf)
     c670_input = c670_feed.join(upper_bf)
     c670_output = self.c670_model.predict(c670_input)
-    c670_sf,c670_op = c670_output.iloc[:,:41*2],c670_output.iloc[:,41*2:]
+    c670_sp,c670_op = c670_output.iloc[:,:41*2],c670_output.iloc[:,41*2:]
+    # c670 sp後處理
+    for i in self.c670_wt_always_same_split_factor_dict.keys():
+      c670_sp[i] = self.c670_wt_always_same_split_factor_dict[i]
 
-    # update by c670 real data model
+    # update by c670 real data model?
     if self.real_data_mode == True:
       c670_op_real = self.c670_real_data_model.predict(c670_input)
       c670_op.update(c670_op_real)
     
-    s1 = c670_sf[self.c670_col['distillate_sf']].values
-    s2 = c670_sf[self.c670_col['bottoms_sf']].values
+    s1 = c670_sp[self.c670_col['distillate_sf']].values
+    s2 = c670_sp[self.c670_col['bottoms_sf']].values
     w1 = sp2wt(c670_feed,s1)
     w2 = sp2wt(c670_feed,s2)
     c670_wt = np.hstack((w1,w2))
