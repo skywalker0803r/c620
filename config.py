@@ -33,4 +33,9 @@ config = {
        'c620_op_log_path':'log/c620_op_log.xlsx',
        'c660_op_log_path':'log/c660_op_log.xlsx',
        'c670_op_log_path':'log/c670_op_log.xlsx',
+      
+      # sp
+      'c620_wt_always_same_split_factor_dict':'data/c620_wt_always_same_split_factor_dict.pkl',
+      'c660_wt_always_same_split_factor_dict':'data/c660_wt_always_same_split_factor_dict.pkl',
+      'c670_wt_always_same_split_factor_dict':'data/c670_wt_always_same_split_factor_dict.pkl',
           }
