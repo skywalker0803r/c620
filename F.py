@@ -86,9 +86,6 @@ class F(object):
     c620_input = c620_case.join(c620_feed)
     c620_output = self.c620_model.predict(c620_input)
     c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
-    # c620 sp後處理
-    for i in self.c620_wt_always_same_split_factor_dict.keys():
-      c620_sp[i] = self.c620_wt_always_same_split_factor_dict[i]
     
     # update by c620 real data model?
     if self.real_data_mode == True:
@@ -96,6 +93,10 @@ class F(object):
       c620_op.update(c620_op_real)
       c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
       c620_sp.update(c620_sp_real)
+    
+    # c620 sp後處理
+    for i in self.c620_wt_always_same_split_factor_dict.keys():
+      c620_sp[i] = self.c620_wt_always_same_split_factor_dict[i]
     
     # 計算 c620_wt
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
@@ -148,9 +149,6 @@ class F(object):
     # c660 output(op&wt)
     c660_output = self.c660_model.predict(c660_input)
     c660_sp,c660_op = c660_output.iloc[:,:41*4],c660_output.iloc[:,41*4:]
-    # c660 sp後處理
-    for i in self.c660_wt_always_same_split_factor_dict.keys():
-      c660_sp[i] = self.c660_wt_always_same_split_factor_dict[i]
 
     # update by c660 real data model?
     if self.real_data_mode == True:
@@ -158,6 +156,10 @@ class F(object):
       c660_op.update(c660_op_real)
       c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
       c660_sp.update(c660_sp_real)
+    
+    # c660 sp後處理
+    for i in self.c660_wt_always_same_split_factor_dict.keys():
+      c660_sp[i] = self.c660_wt_always_same_split_factor_dict[i]
     
     # 計算 c660_wt
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
@@ -198,9 +200,6 @@ class F(object):
     c670_input = c670_feed.join(upper_bf)
     c670_output = self.c670_model.predict(c670_input)
     c670_sp,c670_op = c670_output.iloc[:,:41*2],c670_output.iloc[:,41*2:]
-    # c670 sp後處理
-    for i in self.c670_wt_always_same_split_factor_dict.keys():
-      c670_sp[i] = self.c670_wt_always_same_split_factor_dict[i]
 
     # update by c670 real data model?
     if self.real_data_mode == True:
@@ -208,6 +207,10 @@ class F(object):
       c670_op.update(c670_op_real)
       c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
       c670_sp.update(c670_sp_real)
+    
+    # c670 sp後處理
+    for i in self.c670_wt_always_same_split_factor_dict.keys():
+      c670_sp[i] = self.c670_wt_always_same_split_factor_dict[i]
     
     s1 = c670_sp[self.c670_col['distillate_sf']].values
     s2 = c670_sp[self.c670_col['bottoms_sf']].values
