@@ -39,6 +39,7 @@ class F(object):
     # user can set two mode
     self.Recommended_mode = False
     self.real_data_mode = False
+    self._Post_processing = True
 
   def ICG_loop(self,Input):
     while True:
@@ -95,8 +96,9 @@ class F(object):
       c620_sp.update(c620_sp_real)
     
     # c620 sp後處理
-    for i in self.c620_wt_always_same_split_factor_dict.keys():
-      c620_sp[i] = self.c620_wt_always_same_split_factor_dict[i]
+    if self._Post_processing:
+      for i in self.c620_wt_always_same_split_factor_dict.keys():
+        c620_sp[i] = self.c620_wt_always_same_split_factor_dict[i]
     
     # 計算 c620_wt
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
@@ -105,12 +107,13 @@ class F(object):
     c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
     
     # c620_wt 後處理
-    bz_idx = c620_wt.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
-    other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
-    other_total = (100 - c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values).reshape(-1,1)
-    c620_wt.iloc[:,bz_idx] = c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values
-    c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values /
-                                 c620_wt.iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
+    if self._Post_processing:
+      bz_idx = c620_wt.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
+      other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
+      other_total = (100 - c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values).reshape(-1,1)
+      c620_wt.iloc[:,bz_idx] = c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values
+      c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values /
+                                   c620_wt.iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
     
     # c620 input mass flow rate m3 to ton
     V615_Btm_m3 = icg_input['Simulation Case Conditions_Feed Rate_Feed from V615 Btm_m3/hr'].values.reshape(-1,1)
@@ -158,8 +161,9 @@ class F(object):
       c660_sp.update(c660_sp_real)
     
     # c660 sp後處理
-    for i in self.c660_wt_always_same_split_factor_dict.keys():
-      c660_sp[i] = self.c660_wt_always_same_split_factor_dict[i]
+    if self._Post_processing:
+      for i in self.c660_wt_always_same_split_factor_dict.keys():
+        c660_sp[i] = self.c660_wt_always_same_split_factor_dict[i]
     
     # 計算 c660_wt
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
@@ -168,14 +172,15 @@ class F(object):
     c660_wt = pd.DataFrame(wt,index=idx,columns=self.c660_col['vent_gas_x']+self.c660_col['distillate_x']+self.c660_col['sidedraw_x']+self.c660_col['bottoms_x'])
     
     # c660_wt 後處理
-    na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
-    other_idx = list(set([*range(41)])-set(na_idx))
-    na_total = (c660_input['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'].values/10000).reshape(-1,1)
-    other_total = 100 - na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values/
-                                                c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values.sum(axis=1).reshape(-1,1))*na_total
-    c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values/
-                                                   c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
+    if self._Post_processing:
+      na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
+      other_idx = list(set([*range(41)])-set(na_idx))
+      na_total = (c660_input['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'].values/10000).reshape(-1,1)
+      other_total = 100 - na_total
+      c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values/
+                                                  c660_wt.iloc[:,41*2:41*3].iloc[:,na_idx].values.sum(axis=1).reshape(-1,1))*na_total
+      c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx] = (c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values/
+                                                     c660_wt.iloc[:,41*2:41*3].iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
     
     # c660 output mass flow (ton)
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True)
@@ -209,8 +214,9 @@ class F(object):
       c670_sp.update(c670_sp_real)
     
     # c670 sp後處理
-    for i in self.c670_wt_always_same_split_factor_dict.keys():
-      c670_sp[i] = self.c670_wt_always_same_split_factor_dict[i]
+    if self._Post_processing:
+      for i in self.c670_wt_always_same_split_factor_dict.keys():
+        c670_sp[i] = self.c670_wt_always_same_split_factor_dict[i]
     
     s1 = c670_sp[self.c670_col['distillate_sf']].values
     s2 = c670_sp[self.c670_col['bottoms_sf']].values
