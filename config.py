@@ -10,6 +10,9 @@ config = {
       'c620_model_path_real_data':'model/c620_real_data.pkl',
       'c660_model_path_real_data':'model/c660_real_data.pkl',
       'c670_model_path_real_data':'model/c670_real_data.pkl',
+      
+      # real data op model path
+      'c620_model_path_real_data_op':'model/c620_op_real_data.pkl'
 
       # col_names
       'icg_col_path':'col_names/c620_c670.pkl',
