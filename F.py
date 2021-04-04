@@ -43,6 +43,7 @@ class F(object):
     self.Recommended_mode = False
     self.real_data_mode = False
     self._Post_processing = True
+    self._linear_op_model = False
 
   def ICG_loop(self,Input):
     while True:
@@ -93,10 +94,11 @@ class F(object):
     
     # update by c620 real data model?
     if self.real_data_mode == True:
-      #c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
-      c620_op_real = self.c620_real_data_model_op.predict(c620_input)
-      c620_op.update(c620_op_real)
+      c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
       c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
+      if self._linear_op_model == True:
+        c620_op_real = self.c620_real_data_model_op.predict(c620_input)
+      c620_op.update(c620_op_real)
       c620_sp.update(c620_sp_real)
     
     # c620 sp後處理
