@@ -20,6 +20,11 @@ class F(object):
     self.c660_real_data_model = joblib.load(config['c660_model_path_real_data'])
     self.c670_real_data_model = joblib.load(config['c670_model_path_real_data'])
     
+    # real data linear model
+    self.c620_real_data_model_linear = joblib.load(config['c620_model_path_real_data_linear'])
+    self.c660_real_data_model_linear = joblib.load(config['c660_model_path_real_data_linear'])
+    self.c670_real_data_model_linear = joblib.load(config['c670_model_path_real_data_linear'])
+    
     # columns name
     self.icg_col = joblib.load(config['icg_col_path'])
     self.c620_col = joblib.load(config['c620_col_path'])
@@ -40,6 +45,7 @@ class F(object):
     self.Recommended_mode = False
     self.real_data_mode = False
     self._Post_processing = True
+    self._linear_model = False
 
   def ICG_loop(self,Input):
     while True:
@@ -90,8 +96,12 @@ class F(object):
     
     # update by c620 real data model?
     if self.real_data_mode == True:
-      c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
-      c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
+      if self._linear_model == True:
+        c620_op_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,41*4:] #操作條件放後面
+        c620_sp_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4] #分離係數放前面
+      if self._linear_model == False:
+        c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
+        c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
       c620_op.update(c620_op_real)
       c620_sp.update(c620_sp_real)
     
@@ -155,8 +165,12 @@ class F(object):
 
     # update by c660 real data model?
     if self.real_data_mode == True:
-      c660_op_real = self.c660_real_data_model.predict(c660_input).iloc[:,41*4:] #操作條件放後面
-      c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
+      if self._linear_model == True:
+        c660_op_real = self.c660_real_data_model_linear.predict(c660_input).iloc[:,41*4:] #操作條件放後面
+        c660_sp_real = self.c660_real_data_model_linear.predict(c660_input).iloc[:,:41*4] #分離係數放前面
+      if self._linear_model == False:
+        c660_op_real = self.c660_real_data_model.predict(c660_input).iloc[:,41*4:] #操作條件放後面
+        c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
       c660_op.update(c660_op_real)
       c660_sp.update(c660_sp_real)
     
@@ -208,8 +222,12 @@ class F(object):
 
     # update by c670 real data model?
     if self.real_data_mode == True:
-      c670_op_real = self.c670_real_data_model.predict(c670_input).iloc[:,41*2:] #操作條件放後面
-      c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
+       if self._linear_model == True:
+          c670_op_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,41*2:] #操作條件放後面
+          c670_sp_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*2] #分離係數放前面
+       if self._linear_model == False:
+          c670_op_real = self.c670_real_data_model.predict(c670_input).iloc[:,41*2:] #操作條件放後面
+          c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
       c670_op.update(c670_op_real)
       c670_sp.update(c670_sp_real)
     
