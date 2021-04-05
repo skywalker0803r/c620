@@ -20,11 +20,6 @@ class F(object):
     self.c660_real_data_model = joblib.load(config['c660_model_path_real_data'])
     self.c670_real_data_model = joblib.load(config['c670_model_path_real_data'])
     
-    # real data model op
-    self.c620_real_data_model_op = joblib.load(config['c620_model_path_real_data_op'])
-    self.c660_real_data_model_op = joblib.load(config['c660_model_path_real_data_op'])
-    self.c670_real_data_model_op = joblib.load(config['c670_model_path_real_data_op'])
-    
     # columns name
     self.icg_col = joblib.load(config['icg_col_path'])
     self.c620_col = joblib.load(config['c620_col_path'])
@@ -45,7 +40,6 @@ class F(object):
     self.Recommended_mode = False
     self.real_data_mode = False
     self._Post_processing = True
-    self._linear_op_model = False
 
   def ICG_loop(self,Input):
     while True:
@@ -98,8 +92,6 @@ class F(object):
     if self.real_data_mode == True:
       c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
       c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
-      if self._linear_op_model == True:
-        c620_op_real = self.c620_real_data_model_op.predict(c620_input)
       c620_op.update(c620_op_real)
       c620_sp.update(c620_sp_real)
     
@@ -165,8 +157,6 @@ class F(object):
     if self.real_data_mode == True:
       c660_op_real = self.c660_real_data_model.predict(c660_input).iloc[:,41*4:] #操作條件放後面
       c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
-      if self._linear_op_model == True:
-        c660_op_real = self.c660_real_data_model_op.predict(c660_input)
       c660_op.update(c660_op_real)
       c660_sp.update(c660_sp_real)
     
@@ -220,8 +210,6 @@ class F(object):
     if self.real_data_mode == True:
       c670_op_real = self.c670_real_data_model.predict(c670_input).iloc[:,41*2:] #操作條件放後面
       c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
-      if self._linear_op_model == True:
-        c670_op_real = self.c670_real_data_model_op.predict(c670_input)
       c670_op.update(c670_op_real)
       c670_sp.update(c670_sp_real)
     
