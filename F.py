@@ -222,12 +222,12 @@ class F(object):
 
     # update by c670 real data model?
     if self.real_data_mode == True:
-       if self._linear_model == True:
-          c670_op_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,41*2:] #操作條件放後面
-          c670_sp_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*2] #分離係數放前面
-       if self._linear_model == False:
-          c670_op_real = self.c670_real_data_model.predict(c670_input).iloc[:,41*2:] #操作條件放後面
-          c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
+      if self._linear_model == True:
+        c670_op_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,41*2:] #操作條件放後面
+        c670_sp_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*2] #分離係數放前面
+      if self._linear_model == False:
+        c670_op_real = self.c670_real_data_model.predict(c670_input).iloc[:,41*2:] #操作條件放後面
+        c670_sp_real = self.c670_real_data_model.predict(c670_input).iloc[:,:41*2] #分離係數放前面
       c670_op.update(c670_op_real)
       c670_sp.update(c670_sp_real)
     
