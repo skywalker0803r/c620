@@ -121,7 +121,7 @@ class F(object):
       c620_wt_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4]
       c620_wt.update(c620_wt_real)
     
-    # c620_wt 後處理
+    # c620_wt 後處理 為了在輸出之前滿足業主給的約束條件
     if self._Post_processing:
       bz_idx = c620_wt.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
       other_idx = [i for i in range(41*2,41*3,1) if i != bz_idx]
@@ -197,7 +197,7 @@ class F(object):
       c660_wt_real = self.c660_real_data_model_linear.predict(c660_input).iloc[:,:41*4]
       c660_wt.update(c660_wt_real)
     
-    # c660_wt 後處理
+    # c660_wt 後處理 為了在輸出之前滿足業主給的約束條件
     if self._Post_processing:
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
       other_idx = list(set([*range(41)])-set(na_idx))
@@ -259,5 +259,7 @@ class F(object):
     if self._linear_model:
       c670_wt_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*4]
       c670_wt.update(c670_wt_real)
+    
+    # c670wt沒有後處理
     
     return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
