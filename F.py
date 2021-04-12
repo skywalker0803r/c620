@@ -257,7 +257,7 @@ class F(object):
     
     # 如果是線性模式就再update c670 wt一次,放在後處理前
     if self._linear_model:
-      c670_wt_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*4]
+      c670_wt_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*]
       c670_wt.update(c670_wt_real)
     
     # c670wt沒有後處理
