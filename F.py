@@ -44,8 +44,8 @@ class F(object):
     # user can set two mode
     self.Recommended_mode = False
     self.real_data_mode = False
-    self.Post_processing = True
-    self.linear_model = False
+    self._Post_processing = True
+    self._linear_model = False
 
   def ICG_loop(self,Input):
     while True:
