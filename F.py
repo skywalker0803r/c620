@@ -97,11 +97,11 @@ class F(object):
     # update by c620 real data model?
     if self.real_data_mode == True:
       if self._linear_model == True:
-        c620_op_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,41*4:] #操作條件放後面
-        c620_sp_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4] #分離係數放前面
+        c620_op_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,41*4:]
+        c620_sp_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4]
       if self._linear_model == False:
-        c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] #操作條件放後面
-        c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] #分離係數放前面
+        c620_op_real = self.c620_real_data_model.predict(c620_input).iloc[:,41*4:] 
+        c620_sp_real = self.c620_real_data_model.predict(c620_input).iloc[:,:41*4] 
       c620_op.update(c620_op_real)
       c620_sp.update(c620_sp_real)
     
@@ -116,6 +116,11 @@ class F(object):
     wt = np.hstack((w1,w2,w3,w4))
     c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
     
+    # 如果是線性模式就再update c620 wt一次,放在後處理前
+    if self._linear_model:
+      c620_wt_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4]
+      c620_wt.update(c620_wt_real)
+    
     # c620_wt 後處理
     if self._Post_processing:
       bz_idx = c620_wt.columns.tolist().index('Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%')
@@ -124,6 +129,7 @@ class F(object):
       c620_wt.iloc[:,bz_idx] = c620_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'].values
       c620_wt.iloc[:,other_idx] = (c620_wt.iloc[:,other_idx].values /
                                    c620_wt.iloc[:,other_idx].values.sum(axis=1).reshape(-1,1))*other_total
+
     
     # c620 input mass flow rate m3 to ton
     V615_Btm_m3 = icg_input['Simulation Case Conditions_Feed Rate_Feed from V615 Btm_m3/hr'].values.reshape(-1,1)
@@ -185,6 +191,12 @@ class F(object):
     wt = np.hstack((w1,w2,w3,w4))
     c660_wt = pd.DataFrame(wt,index=idx,columns=self.c660_col['vent_gas_x']+self.c660_col['distillate_x']+self.c660_col['sidedraw_x']+self.c660_col['bottoms_x'])
     
+    
+    # 如果是線性模式就再update c660 wt一次,放在後處理前
+    if self._linear_model:
+      c660_wt_real = self.c660_real_data_model_linear.predict(c660_input).iloc[:,:41*4]
+      c660_wt.update(c660_wt_real)
+    
     # c660_wt 後處理
     if self._Post_processing:
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
@@ -242,5 +254,10 @@ class F(object):
     w2 = sp2wt(c670_feed,s2)
     c670_wt = np.hstack((w1,w2))
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
+    
+    # 如果是線性模式就再update c670 wt一次,放在後處理前
+    if self._linear_model:
+      c670_wt_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41*4]
+      c670_wt.update(c670_wt_real)
     
     return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
