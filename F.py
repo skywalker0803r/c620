@@ -183,7 +183,7 @@ class F(object):
         c660_op_real = self.c660_real_data_model_linear.predict(c660_input)[:,41*4:]
         c660_op_real = pd.DataFrame(c660_op_real,index=c660_input.index,columns=self.c660_simple_op_col)
         c660_sp_real = self.c660_real_data_model_linear.predict(c660_input)[:,:41*4]
-        c660_sp_real = pd.DataFrame(c660_sp_real,index=c660_input.index,columns=c660_sp)
+        c660_sp_real = pd.DataFrame(c660_sp_real,index=c660_input.index,columns=c660_sp.columns)
       if self._linear_model == False:
         c660_op_real = self.c660_real_data_model.predict(c660_input).iloc[:,41*4:] #操作條件放後面
         c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
