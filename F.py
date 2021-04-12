@@ -97,7 +97,7 @@ class F(object):
     # c620 output(op&wt)
     c620_input = c620_case.join(c620_feed)
     c620_output = self.c620_model.predict(c620_input)
-    print(c620_output)
+    c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
     
     # update by c620 real data model?
     if self.real_data_mode == True:
@@ -125,7 +125,7 @@ class F(object):
     
     # 如果是線性模式就再update c620 wt一次,放在後處理前
     if self._linear_model:
-      c620_wt_real = self.c620_real_data_model_linear.predict(c620_input).iloc[:,:41*4]
+      c620_wt_real = self.c620_real_data_model_linear.predict(c620_input)[:,:41*4]
       c620_wt_real = pd.DataFrame(c620_wt_real,index=c620_input.index,columns=c620_wt.columns)
       c620_wt.update(c620_wt_real)
     
@@ -183,7 +183,7 @@ class F(object):
         c660_op_real = self.c660_real_data_model_linear.predict(c660_input)[:,41*4:]
         c660_op_real = pd.DataFrame(c660_op_real,index=c660_input.index,columns=self.c660_simple_op_col)
         c660_sp_real = self.c660_real_data_model_linear.predict(c660_input)[:,:41*4]
-        c660_sp_real = pd.DataFrame(c660_sp_real,index=c660_input.index,columns=c660_sp.columns)
+        c660_sp_real = pd.DataFrame(c660_sp_real,index=c660_input.index,columns=c660_sp)
       if self._linear_model == False:
         c660_op_real = self.c660_real_data_model.predict(c660_input).iloc[:,41*4:] #操作條件放後面
         c660_sp_real = self.c660_real_data_model.predict(c660_input).iloc[:,:41*4] #分離係數放前面
@@ -204,7 +204,7 @@ class F(object):
     
     # 如果是線性模式就再update c660 wt一次,放在後處理前
     if self._linear_model:
-      c660_wt_real = self.c660_real_data_model_linear.predict(c660_input).iloc[:,:41*4]
+      c660_wt_real = self.c660_real_data_model_linear.predict(c660_input)[:,:41*4]
       c660_wt_real = pd.DataFrame(c660_wt_real,index=c660_input.index,columns=c660_wt.columns)
       c660_wt.update(c660_wt_real)
     
@@ -270,7 +270,7 @@ class F(object):
     
     # 如果是線性模式就再update c670 wt一次,放在後處理前
     if self._linear_model:
-      c670_wt_real = self.c670_real_data_model_linear.predict(c670_input).iloc[:,:41]
+      c670_wt_real = self.c670_real_data_model_linear.predict(c670_input)[:,:41*2]
       c670_wt_real = pd.DataFrame(c670_wt_real,index=c670_input.index,columns=c670_wt.columns)
       c670_wt.update(c670_wt_real)
     
