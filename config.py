@@ -1,4 +1,10 @@
 config = {
+      
+      # simple op_col
+      'c620_simple_op_col':'data/c620_simple_op_col.pkl',
+      'c660_simple_op_col':'data/c660_simple_op_col.pkl',
+      'c670_simple_op_col':'data/c670_simple_op_col.pkl',
+      
       # model path
       'icg_model_path':'model/c620_icg_svr.pkl',
       'c620_model_path':'model/c620.pkl',
