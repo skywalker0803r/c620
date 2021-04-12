@@ -97,7 +97,7 @@ class F(object):
     # c620 output(op&wt)
     c620_input = c620_case.join(c620_feed)
     c620_output = self.c620_model.predict(c620_input)
-    c620_sp,c620_op = c620_output.iloc[:,:41*4],c620_output.iloc[:,41*4:]
+    print(c620_output)
     
     # update by c620 real data model?
     if self.real_data_mode == True:
