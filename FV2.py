@@ -101,7 +101,7 @@ class FV2(object):
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
     return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
   
-  def recommend(self,icg_input,c620_feed,t651_feed):
+  def recommend(self,icg_input,c620_feed,t651_feed,return_error=False):
     idx = icg_input.index
     c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = self.inference(icg_input,c620_feed,t651_feed)
 
@@ -217,4 +217,7 @@ class FV2(object):
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
     c670_op_delta = c670_op_opt - c670_op
     
-    return c620_op_opt,c660_op_opt,c670_op_opt,bz_error,nainbz_error,tol_error
+    if return_error == True:
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
+    else:
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt
