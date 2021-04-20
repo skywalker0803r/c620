@@ -123,9 +123,10 @@ class FV2(object):
       wt = np.hstack((w1,w2,w3,w4))
       c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
-      loss = (輸入端bz - 輸出端bz)**2
+      loss = abs(輸入端bz - 輸出端bz)
       return loss
-    study = optuna.create_study()
+    sampler = optuna.samplers.CmaEsSampler()
+    study = optuna.create_study(sampler=sampler)
     study.optimize(c620_objective, n_trials=300)
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
     c620_op_delta = c620_op_opt - c620_op
@@ -171,10 +172,11 @@ class FV2(object):
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
       輸出端nainbz = c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
       輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
-      loss1 = (輸入端nainbz - 輸出端nainbz)**2
-      loss2 = (輸入端tol - 輸出端tol)**2
+      loss1 = abs(輸入端nainbz - 輸出端nainbz)
+      loss2 = abs(輸入端tol - 輸出端tol)
       return loss1+loss2
-    study = optuna.create_study()
+    sampler = optuna.samplers.CmaEsSampler()
+    study = optuna.create_study(sampler=sampler)
     study.optimize(c660_objective, n_trials=300)
     c660_op_opt = pd.DataFrame(study.best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
