@@ -101,7 +101,7 @@ class FV2(object):
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
     return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
   
-  def recommend(self,icg_input,c620_feed,t651_feed,return_error=False):
+  def recommend(self,icg_input,c620_feed,t651_feed,return_error=False,search_iteration=300):
     idx = icg_input.index
     c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = self.inference(icg_input,c620_feed,t651_feed)
 
@@ -127,7 +127,7 @@ class FV2(object):
       return loss
     sampler = optuna.samplers.CmaEsSampler()
     study = optuna.create_study(sampler=sampler)
-    study.optimize(c620_objective, n_trials=300)
+    study.optimize(c620_objective, n_trials=search_iteration)
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
     c620_op_delta = c620_op_opt - c620_op
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op_opt))
@@ -177,7 +177,7 @@ class FV2(object):
       return loss1+loss2
     sampler = optuna.samplers.CmaEsSampler()
     study = optuna.create_study(sampler=sampler)
-    study.optimize(c660_objective, n_trials=300)
+    study.optimize(c660_objective, n_trials=search_iteration)
     c660_op_opt = pd.DataFrame(study.best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
