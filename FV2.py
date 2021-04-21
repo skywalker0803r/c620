@@ -109,7 +109,7 @@ class FV2(object):
     c620_case = pd.DataFrame(index=idx,columns=self.c620_col['case'])
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 1 : Receiver Temp_oC'].values
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values
-    c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = 70
+    c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     c620_op_col = c620_op.columns.tolist()
     def c620_objective(trial):
       c620_op_dict = {}
@@ -123,10 +123,9 @@ class FV2(object):
       wt = np.hstack((w1,w2,w3,w4))
       c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
-      loss = abs(輸入端bz - 輸出端bz)
+      loss = (輸入端bz - 輸出端bz)**2
       return loss
-    sampler = optuna.samplers.CmaEsSampler()
-    study = optuna.create_study(sampler=sampler)
+    study = optuna.create_study()
     study.optimize(c620_objective, n_trials=search_iteration)
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
     c620_op_delta = c620_op_opt - c620_op
@@ -154,8 +153,8 @@ class FV2(object):
     c660_feed = c620_wt[self.c620_col['sidedraw_x']].values*c620_mf_side_p + t651_feed.values*t651_mf_p
     c660_feed = pd.DataFrame(c660_feed,index=idx,columns=self.c660_col['x41'])
     c660_case = pd.DataFrame(index=idx,columns=self.c660_col['case'])
-    c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = 980
-    c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
+    c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw']
+    c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw']
     c660_op_col = c660_op.columns.tolist()
     def c660_objective(trial):
       c660_op_dict = {}
@@ -172,11 +171,10 @@ class FV2(object):
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
       輸出端nainbz = c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
       輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
-      loss1 = abs(輸入端nainbz - 輸出端nainbz)
-      loss2 = abs(輸入端tol - 輸出端tol)
+      loss1 = (輸入端nainbz - 輸出端nainbz)**2
+      loss2 = (輸入端tol - 輸出端tol)**2
       return loss1+loss2
-    sampler = optuna.samplers.CmaEsSampler()
-    study = optuna.create_study(sampler=sampler)
+    study = optuna.create_study()
     study.optimize(c660_objective, n_trials=search_iteration)
     c660_op_opt = pd.DataFrame(study.best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
