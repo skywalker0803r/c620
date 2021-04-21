@@ -125,7 +125,8 @@ class AllSystem(object):
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
       loss = (輸入端bz - 輸出端bz)**2
       return loss
-    study = optuna.create_study()
+    sampler = optuna.samplers.CmaEsSampler()
+    study = optuna.create_study(sampler=sampler)
     study.optimize(c620_objective, n_trials=search_iteration)
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
     c620_op_delta = c620_op_opt - c620_op
@@ -174,7 +175,8 @@ class AllSystem(object):
       loss1 = (輸入端nainbz - 輸出端nainbz)**2
       loss2 = (輸入端tol - 輸出端tol)**2
       return loss1+loss2
-    study = optuna.create_study()
+    sampler = optuna.samplers.CmaEsSampler()
+    study = optuna.create_study(sampler=sampler)
     study.optimize(c660_objective, n_trials=search_iteration)
     c660_op_opt = pd.DataFrame(study.best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
