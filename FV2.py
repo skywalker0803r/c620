@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import autorch
 from autorch.function import sp2wt
 import optuna
+import torch
 
 class AllSystem(object):
   def __init__(self,config):
