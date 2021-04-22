@@ -24,6 +24,9 @@ class AllSystem(object):
 
     # C670 part
     self.c670_M = joblib.load(config['c670_M'])
+    
+    # op fix model
+    self.op_fix_model = joblib.load(config['op_fix_model'])
 
     # columns name
     self.icg_col = joblib.load(config['icg_col_path'])
@@ -41,7 +44,7 @@ class AllSystem(object):
     self.C820_density = 0.8731
     self.T651_density = 0.8749
   
-  def inference(self,icg_input,c620_feed,t651_feed):
+  def inference(self,icg_input,c620_feed,t651_feed,real_data_mode=False):
     idx = icg_input.index
     #c620
     c620_case = pd.DataFrame(index=idx,columns=self.c620_col['case'])
@@ -99,7 +102,46 @@ class AllSystem(object):
     w2 = sp2wt(c670_feed,s2)
     c670_wt = np.hstack((w1,w2))
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
-    return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
+    
+    # 是否修正操作條件for現場數據
+    if real_data_mode == False:
+      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
+    
+    else:
+      
+      # 有些欄位現場數據沒有
+      c620_op_col = c620_op.drop(['Tatoray Stripper C620 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Tatoray Stripper C620 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      c660_op_col = c660_op.drop(['Benzene Column C660 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Benzene Column C660 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      c670_op_col = c670_op.drop(['Toluene Column C670 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      
+      # 經過修正模組重新算一下op
+      op_pred = self.op_fix_model(torch.cat((
+        torch.FloatTensor(c620_op[c620_op_col].values),
+        torch.FloatTensor(c660_op[c660_op_col].values),
+        torch.FloatTensor(c670_op[c670_op_col].values)),dim=1))
+      
+      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
+      
+      new_c620_op = op_pred.iloc[:,:8]
+      new_c660_op = op_pred.iloc[:,8:16]
+      new_c670_op = op_pred.iloc[:,-5:]
+      
+      new_c620_op.columns = c620_op_col
+      new_c660_op.columns = c660_op_col
+      new_c670_op.columns = c670_op_col
+      
+      # 更新
+      c620_op.update(new_c620_op)
+      c660_op.update(new_c660_op)
+      c670_op.update(new_c670_op)
+      
+      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
   
   def recommend(self,icg_input,c620_feed,t651_feed,search_iteration=300):
     idx = icg_input.index
@@ -219,4 +261,41 @@ class AllSystem(object):
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
     c670_op_delta = c670_op_opt - c670_op
     
-    return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
+    # 是否修正操作條件for現場數據
+    if real_data_mode == False:
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
+    
+    else:
+      # 有些欄位現場數據沒有
+      c620_op_col = c620_op.drop(['Tatoray Stripper C620 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Tatoray Stripper C620 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      c660_op_col = c660_op.drop(['Benzene Column C660 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Benzene Column C660 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      c670_op_col = c670_op.drop(['Toluene Column C670 Operation_Heat Duty_Condenser Heat Duty_Mkcal/hr',
+                                 'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
+                                 axis=1).columns.tolist()
+      
+      # 經過修正模組重新算一下op
+      op_pred = self.op_fix_model(torch.cat((
+        torch.FloatTensor(c620_op_opt[c620_op_col].values),
+        torch.FloatTensor(c660_op_opt[c660_op_col].values),
+        torch.FloatTensor(c670_op_opt[c670_op_col].values)),dim=1))
+      
+      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
+      
+      new_c620_op = op_pred.iloc[:,:8]
+      new_c660_op = op_pred.iloc[:,8:16]
+      new_c670_op = op_pred.iloc[:,-5:]
+      
+      new_c620_op.columns = c620_op_col
+      new_c660_op.columns = c660_op_col
+      new_c670_op.columns = c670_op_col
+      
+      # 更新
+      c620_op_opt.update(new_c620_op)
+      c660_op_opt.update(new_c660_op)
+      c670_op_opt.update(new_c670_op)
+      
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
