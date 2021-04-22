@@ -28,4 +28,8 @@ config = {
       'c620_wt_always_same_split_factor_dict':'data/c620_wt_always_same_split_factor_dict.pkl',
       'c660_wt_always_same_split_factor_dict':'data/c660_wt_always_same_split_factor_dict.pkl',
       'c670_wt_always_same_split_factor_dict':'data/c670_wt_always_same_split_factor_dict.pkl',
+      
+      # op fix model
+      'op_fix_model':'model/fix_model.pkl'
+      
           }
