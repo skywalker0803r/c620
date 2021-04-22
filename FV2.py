@@ -144,7 +144,7 @@ class AllSystem(object):
       
       return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op
   
-  def recommend(self,icg_input,c620_feed,t651_feed,search_iteration=300):
+  def recommend(self,icg_input,c620_feed,t651_feed,search_iteration=300,real_data_mode=False):
     idx = icg_input.index
     c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = self.inference(icg_input,c620_feed,t651_feed)
 
