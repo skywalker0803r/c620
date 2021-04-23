@@ -84,6 +84,7 @@ class F(object):
       icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980.0 
       icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70.0
       icg_output,icg_input = self.ICG_loop(icg_input)
+      print(icg_output)
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_output.values
       c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     
