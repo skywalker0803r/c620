@@ -202,7 +202,7 @@ class AllSystem(object):
       # 計算誤差 Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt% 誤差
       輸入端bz = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
-      loss = (輸入端bz - 輸出端bz)**2
+      loss = abs(輸入端bz - 輸出端bz)
       return loss
     
     # cma-es 優化初始值 x0
@@ -279,9 +279,8 @@ class AllSystem(object):
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
       輸出端nainbz = c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
       輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
-      loss1 = (輸入端nainbz - 輸出端nainbz)**2
-      loss2 = (輸入端tol - 輸出端tol)**2
-      
+      loss1 = abs(輸入端nainbz - 輸出端nainbz)
+      loss2 = abs(輸入端tol - 輸出端tol)
       return loss1 + loss2
     
     # cma-es 優化初始值 x0
