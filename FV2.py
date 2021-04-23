@@ -55,6 +55,12 @@ class AllSystem(object):
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     # 預測操作條件和分離係數
     c620_op = self.c620_G.predict(c620_case.join(c620_feed))
+    
+    # debug
+    print(c620_case.shape)
+    print(c620_feed.shape)
+    print(c620_op.shape)
+    
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op))
     # 計算組成
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
@@ -82,6 +88,12 @@ class AllSystem(object):
     c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values
     # 預測操作條件和分離係數
     c660_op = self.c660_G.predict(c660_case.join(c660_feed))
+    
+    # debug
+    print(c660_case.shape)
+    print(c660_feed.shape)
+    print(c660_op.shape)
+    
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op))
     # 計算組成
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
