@@ -193,6 +193,11 @@ class AllSystem(object):
       loss = (輸入端bz - 輸出端bz)**2
       return loss
     
+    # cma-es 優化初始值 x0
+    x0 = {}
+    for name in c620_op_col:
+      x0[name] = c620_op[name].values[0]
+    
     # cma-es 優化
     sampler = optuna.samplers.CmaEsSampler()
     study = optuna.create_study(sampler=sampler)
@@ -262,8 +267,13 @@ class AllSystem(object):
       
       return loss1 + loss2
     
+    # cma-es 優化初始值 x0
+    x0 = {}
+    for name in c660_op_col:
+       x0[name] = c660_op[name].values[0]
+    
     # NA in Benzene_ppmw 從使用者輸入的數值當作初始值開始調整
-    x0 = {'Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw':icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]}
+    x0['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
     
     # cma-es 優化
     sampler = optuna.samplers.CmaEsSampler(x0=x0)
