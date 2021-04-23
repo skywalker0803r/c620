@@ -187,13 +187,13 @@ class AllSystem(object):
     def c620_objective(trial):
       
       # 操作是可以調整的
-      c620_op_dict = {}
+      c620_op_opt_dict = {}
       for name in c620_op_col:
-        c620_op_dict[name] = trial.suggest_uniform(name,self.c620_op_min[name],self.c620_op_max[name])
-      c620_op = pd.DataFrame(c620_op_dict,index=idx)
+        c620_op_opt_dict[name] = trial.suggest_uniform(name,self.c620_op_min[name],self.c620_op_max[name])
+      c620_op_opt = pd.DataFrame(c620_op_opt_dict,index=idx)
       
       # 計算c620_wt
-      c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op))
+      c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op_opt))
       s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
       w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
       wt = np.hstack((w1,w2,w3,w4))
@@ -217,6 +217,8 @@ class AllSystem(object):
     
     # 可能是最優的操作條件
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
+    
+    # 調幅
     c620_op_delta = c620_op_opt - c620_op
     
     # debug
@@ -259,17 +261,17 @@ class AllSystem(object):
     def c660_objective(trial):
       
       # 操作是可以調整的
-      c660_op_dict = {}
+      c660_op_opt_dict = {}
       for name in c660_op_col:
-        c660_op_dict[name] = trial.suggest_uniform(name,self.c660_op_min[name],self.c660_op_max[name])
-      c660_op = pd.DataFrame(c660_op_dict,index=idx)
+        c660_op_opt_dict[name] = trial.suggest_uniform(name,self.c660_op_min[name],self.c660_op_max[name])
+      c660_op_opt = pd.DataFrame(c660_op_opt_dict,index=idx)
       
       # 取代ICG功能 歷史數據中NA in Benzene_ppmw範圍落在 [800~980] 在這個範圍內搜索即可
       輸入端nainbz =  trial.suggest_float('Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw',800,980)
       輸入端tol = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values[0]
       
       # 計算c660_wt
-      c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op))
+      c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
       s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
       w1,w2,w3,w4 = sp2wt(c660_feed,s1),sp2wt(c660_feed,s2),sp2wt(c660_feed,s3),sp2wt(c660_feed,s4)
       wt = np.hstack((w1,w2,w3,w4))
@@ -300,6 +302,8 @@ class AllSystem(object):
     best_params = study.best_params
     del best_params['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw']
     c660_op_opt = pd.DataFrame(best_params,index=idx)
+    
+    # 調幅
     c660_op_delta = c660_op_opt - c660_op
     
     # debug
@@ -352,6 +356,8 @@ class AllSystem(object):
     w2 = sp2wt(c670_feed,s2)
     c670_wt = np.hstack((w1,w2))
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
+    
+    # 調幅
     c670_op_delta = c670_op_opt - c670_op
     
     # 是否修正操作條件 for 現場數據
