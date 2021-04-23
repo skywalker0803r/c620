@@ -269,6 +269,7 @@ class AllSystem(object):
       # 取代ICG功能 歷史數據中NA in Benzene_ppmw範圍落在 [800~980] 在這個範圍內搜索即可
       輸入端nainbz =  trial.suggest_float('Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw',800,980)
       輸入端tol = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values[0]
+      c660_case['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 輸入端nainbz
       
       # 計算c660_wt
       c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
