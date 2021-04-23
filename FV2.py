@@ -219,6 +219,11 @@ class AllSystem(object):
     c620_op_opt = pd.DataFrame(study.best_params,index=idx)
     c620_op_delta = c620_op_opt - c620_op
     
+    # debug
+    print(c620_case.shape)
+    print(c620_feed.shape)
+    print(c620_op_opt.shape)
+    
     # 計算c620_wt
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op_opt))
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
@@ -295,6 +300,11 @@ class AllSystem(object):
     # 優化過的操作條件
     c660_op_opt = pd.DataFrame(study.best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
+    
+    # debug
+    print(c660_case.shape)
+    print(c660_feed.shape)
+    print(c660_op_opt.shape)
     
     # 計算c660_wt
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
