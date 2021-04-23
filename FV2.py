@@ -273,7 +273,7 @@ class AllSystem(object):
        x0[name] = c660_op[name].values[0]
     
     # NA in Benzene_ppmw 從使用者輸入的數值當作初始值開始調整
-    x0['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
+    x0['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
     
     # cma-es 優化
     sampler = optuna.samplers.CmaEsSampler(x0=x0)
