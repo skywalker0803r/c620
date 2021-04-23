@@ -298,7 +298,9 @@ class AllSystem(object):
     study.optimize(c660_objective, n_trials=search_iteration)
     
     # 優化過的操作條件
-    c660_op_opt = pd.DataFrame(study.best_params,index=idx)
+    best_params = study.best_params
+    del best_params['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw']
+    c660_op_opt = pd.DataFrame(best_params,index=idx)
     c660_op_delta = c660_op_opt - c660_op
     
     # debug
