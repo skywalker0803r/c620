@@ -312,6 +312,10 @@ class AllSystem(object):
     print(c660_feed.shape)
     print(c660_op_opt.shape)
     
+    print(c660_case.columns.tolist())
+    print(c660_feed.columns.tolist())
+    print(c660_op_opt.columns.tolist())
+    
     # 計算c660_wt
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
     s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
