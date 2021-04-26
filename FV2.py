@@ -41,10 +41,15 @@ class AllSystem(object):
     self.c670_wt_always_same_split_factor_dict = joblib.load(config['c670_wt_always_same_split_factor_dict'])
     self.index_9999 = joblib.load(config['index_9999_path'])
     self.index_0001 = joblib.load(config['index_0001_path'])
+    
     # 廠區提供密度
     self.V615_density = 0.8626
     self.C820_density = 0.8731
     self.T651_density = 0.8749
+
+    # 廠區通常調整欄位
+    self.c620_op_col_can_change = ['Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 14 (Control)_oC','Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 34 (Control)_oC']
+    self.c660_op_col_can_change = ['Benzene Column C660 Operation_Column Temp Profile_C660 Tray 6 (SD & Control)_oC','Benzene Column C660 Operation_Column Temp Profile_C660 Tray 23 (Control)_oC']
   
   def inference(self,icg_input,c620_feed,t651_feed,real_data_mode=False):
     idx = icg_input.index
@@ -55,11 +60,6 @@ class AllSystem(object):
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     # 預測操作條件和分離係數
     c620_op = self.c620_G.predict(c620_case.join(c620_feed))
-    
-    # debug
-    print(c620_case.shape)
-    print(c620_feed.shape)
-    print(c620_op.shape)
     
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op))
     # 計算組成
@@ -88,11 +88,6 @@ class AllSystem(object):
     c660_case['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values
     # 預測操作條件和分離係數
     c660_op = self.c660_G.predict(c660_case.join(c660_feed))
-    
-    # debug
-    print(c660_case.shape)
-    print(c660_feed.shape)
-    print(c660_op.shape)
     
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op))
     # 計算組成
@@ -183,50 +178,62 @@ class AllSystem(object):
     c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values
     c620_op_col = c620_op.columns.tolist()
     
-    # c620 目標函數 輸入端bz 和 輸出端bz 愈接近愈好
+    # c620 目標函數 
     def c620_objective(trial):
-      
-      # 操作是可以調整的
+      # 首先操作是可以調整的
       c620_op_opt_dict = {}
       for name in c620_op_col:
-        c620_op_opt_dict[name] = trial.suggest_uniform(name,self.c620_op_min[name],self.c620_op_max[name])
-      c620_op_opt = pd.DataFrame(c620_op_opt_dict,index=idx)
+        # 但是廠區通常只調整溫度欄位
+        if name in self.c620_op_col_can_change:
+          c620_op_opt_dict[name] = trial.suggest_uniform(name,self.c620_op_min[name],self.c620_op_max[name])
+        else:
+        # 所以其他欄位就依照試算模式給的設定
+          c620_op_opt_dict[name] = c620_op[name].values[0] 
       
-      # 計算c620_wt
+      c620_op_opt = pd.DataFrame(c620_op_opt_dict,index=idx)
+
+      # 這裡取代ICG功能 歷史數據中Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr範圍落在 10.25~0 在這個範圍內搜索即可
+      dist_rate = trial.suggest_float('Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr',0,10.25)
+      c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
+      # 有了c620_case,c620_feed,c620_op_opt就可以計算c620_wt
       c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op_opt))
       s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
       w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
       wt = np.hstack((w1,w2,w3,w4))
       c620_wt = pd.DataFrame(wt,index=idx,columns=self.c620_col['vent_gas_x']+self.c620_col['distillate_x']+self.c620_col['sidedraw_x']+self.c620_col['bottoms_x'])
-      
-      # 計算誤差 Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt% 誤差
+      # 計算Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt% 誤差
       輸入端bz = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
-      loss = abs(輸入端bz - 輸出端bz)
-      return loss
+      
+      # bz 在輸入端和輸出端要一致
+      loss1 = abs(輸入端bz - 輸出端bz)      
+      
+      # 鼓勵dist_rate接近於1
+      loss2 = abs(dist_rate - 1) 
+      
+      return loss1 + loss2
     
-    # cma-es 優化初始值 x0
+    # cma-es給定優化初始值x0
     x0 = {}
     for name in c620_op_col:
       x0[name] = c620_op[name].values[0]
+    # Distillate Rate_m3/hr 從使用者輸入的數值當作初始值開始調整 調整範圍在 0~10.25 多數情況下從 0 往上遞增
+    x0['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
     
-    # cma-es 優化
-    sampler = optuna.samplers.CmaEsSampler()
+    # cma-es 開始優化
+    sampler = optuna.samplers.CmaEsSampler(x0=x0)
     study = optuna.create_study(sampler=sampler)
-    study.optimize(c620_objective, n_trials=search_iteration)
+    study.optimize(c620_objective, n_trials = search_iteration)
     
-    # 可能是最優的操作條件
-    c620_op_opt = pd.DataFrame(study.best_params,index=idx)
+    # 優化完畢給出可能是最優的參數
+    params_df = pd.DataFrame(study.best_params,index=idx,columns = c620_op_col+['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'])
     
-    # 調幅
-    c620_op_delta = c620_op_opt - c620_op
-    
-    # debug
-    print(c620_case.shape)
-    print(c620_feed.shape)
-    print(c620_op_opt.shape)
-    
-    # 計算c620_wt
+    # 最優的操作 操作條件裡面只有屬於self.c620_op_col_can_change會被替換掉
+    c620_op_opt = c620_op.drop(self.c620_op_col_can_change,axis=1).join(params_df[c620_op_col][self.c620_op_col_can_change])
+    # 最優的dist rate
+    c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = params_df['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr']
+
+    # 有了c620_case,c620_feed,c620_op_opt計算c620_wt
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op_opt))
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
     w1,w2,w3,w4 = sp2wt(c620_feed,s1),sp2wt(c620_feed,s2),sp2wt(c620_feed,s3),sp2wt(c620_feed,s4)
@@ -237,7 +244,6 @@ class AllSystem(object):
     輸入端bz = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
     輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
     bz_error = abs(輸入端bz-輸出端bz)
-    print('bz_error:',bz_error)
     
     # c660 部份
     V615_Btm_m3 = icg_input['Simulation Case Conditions_Feed Rate_Feed from V615 Btm_m3/hr'].values.reshape(-1,1)
@@ -250,6 +256,7 @@ class AllSystem(object):
     t651_mf = (icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr']*self.T651_density).values.reshape(-1,1) # t651重量流量
     c660_mf = t651_mf + c620_mf_side # 兩股相加得到c660入料重量流量
     t651_mf_p ,c620_mf_side_p = t651_mf/c660_mf ,c620_mf_side/c660_mf # 兩股油源的占比百分比
+
     c660_feed = c620_wt[self.c620_col['sidedraw_x']].values*c620_mf_side_p + t651_feed.values*t651_mf_p #計算c660入料組成
     c660_feed = pd.DataFrame(c660_feed,index=idx,columns=self.c660_col['x41'])
     c660_case = pd.DataFrame(index=idx,columns=self.c660_col['case']) # 計算c660_case
@@ -259,19 +266,27 @@ class AllSystem(object):
     
     # c660 目標函數
     def c660_objective(trial):
-      
-      # 操作是可以調整的
+      # 首先操作是可以調整的
       c660_op_opt_dict = {}
       for name in c660_op_col:
-        c660_op_opt_dict[name] = trial.suggest_uniform(name,self.c660_op_min[name],self.c660_op_max[name])
+        # 但是廠區通常只調整溫度欄位
+        if name in ['Benzene Column C660 Operation_Column Temp Profile_C660 Tray 6 (SD & Control)_oC','Benzene Column C660 Operation_Column Temp Profile_C660 Tray 23 (Control)_oC']:
+          c660_op_opt_dict[name] = trial.suggest_uniform(name,self.c660_op_min[name],self.c660_op_max[name])
+        else:
+        # 所以其他欄位就依照試算模式給的設定
+          c660_op_opt_dict[name] = c660_op[name].values[0]
+      
+      # c660優化操作條件dataframe
       c660_op_opt = pd.DataFrame(c660_op_opt_dict,index=idx)
       
       # 取代ICG功能 歷史數據中NA in Benzene_ppmw範圍落在 [800~980] 在這個範圍內搜索即可
       輸入端nainbz =  trial.suggest_float('Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw',800,980)
-      輸入端tol = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values[0]
+      # 搜索到一個可能比較優的NA in Benzene_ppmw 代入c660_case
       c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = 輸入端nainbz
-      
-      # 計算c660_wt
+      # 這裡設定輸入端tol為一個數值,可以是使用者給定或是開啟auto_set_x0 = True 自動設置為10
+      輸入端tol = icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'].values[0]
+
+      # 有了c660_case,c660_feed,c660_op_opt計算c660_wt
       c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
       s1,s2,s3,s4 = c660_sp.iloc[:,:41].values,c660_sp.iloc[:,41:41*2].values,c660_sp.iloc[:,41*2:41*3].values,c660_sp.iloc[:,41*3:41*4].values
       w1,w2,w3,w4 = sp2wt(c660_feed,s1),sp2wt(c660_feed,s2),sp2wt(c660_feed,s3),sp2wt(c660_feed,s4)
@@ -282,16 +297,21 @@ class AllSystem(object):
       na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
       輸出端nainbz = c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
       輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
+      
+      # 這一項是多個成份的加總
       loss1 = abs(輸入端nainbz - 輸出端nainbz)
+      
+      # 這一項是單個成份簡稱tol
       loss2 = abs(輸入端tol - 輸出端tol)
-      return loss1 + loss2
+      
+      return loss1 + len(na_idx)*loss2
     
     # cma-es 優化初始值 x0
     x0 = {}
     for name in c660_op_col:
        x0[name] = c660_op[name].values[0]
     
-    # NA in Benzene_ppmw 從使用者輸入的數值當作初始值開始調整
+    # NA in Benzene_ppmw 從使用者輸入的數值當作初始值開始調整 調整範圍在 980~800 多數情況下從980遞減
     x0['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'].values[0]
     
     # cma-es 優化
@@ -300,21 +320,11 @@ class AllSystem(object):
     study.optimize(c660_objective, n_trials=search_iteration)
     
     # 優化過的操作條件
-    best_params = study.best_params
-    del best_params['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw']
-    c660_op_opt = pd.DataFrame(best_params,index=idx)
-    
-    # 調幅
-    c660_op_delta = c660_op_opt - c660_op
-    
-    # debug
-    print(c660_case.shape)
-    print(c660_feed.shape)
-    print(c660_op_opt.shape)
-    
-    print(c660_case.columns.tolist())
-    print(c660_feed.columns.tolist())
-    print(c660_op_opt.columns.tolist())
+    params_df = pd.DataFrame(study.best_params,index = idx,columns = c660_op_col+['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'])
+    # 最優的操作 操作條件裡面只有屬於self.c660_op_col_can_change會被替換掉
+    c660_op_opt = c660_op.drop(self.c660_op_col_can_change,axis=1).join(params_df[c660_op_col][self.c660_op_col_can_change])
+    # 最優的nainbz
+    c660_case['Benzene Column C660 Operation_Specifications_Spec 2 : NA in Benzene_ppmw'] = params_df['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = params_df['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw']
     
     # 計算c660_wt
     c660_sp = self.c660_F.predict(c660_case.join(c660_feed).join(c660_op_opt))
@@ -331,8 +341,13 @@ class AllSystem(object):
     輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
     nainbz_error = abs(輸入端nainbz-輸出端nainbz)
     tol_error = abs(輸入端tol-輸出端tol)
+    
+    # 打印優化結果
+    print('bz_error:',bz_error)
     print('nainbz_error:',nainbz_error)
     print('tol_error:',tol_error)
+    print('dist_rate',c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0])
+    print('nainbz:',c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000)
 
     # c670 部份
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True) # c660_bot 重量流量
@@ -361,9 +376,6 @@ class AllSystem(object):
     w2 = sp2wt(c670_feed,s2)
     c670_wt = np.hstack((w1,w2))
     c670_wt = pd.DataFrame(c670_wt,index = idx,columns=self.c670_col['distillate_x']+self.c670_col['bottoms_x'])
-    
-    # 調幅
-    c670_op_delta = c670_op_opt - c670_op
     
     # 是否修正操作條件 for 現場數據
     if real_data_mode == False:
