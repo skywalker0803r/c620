@@ -167,9 +167,9 @@ class AllSystem(object):
     
     # 是否要自動設置 70,980,10 , 否則的話使用者可以自行設定 例如,80,990,15
     if auto_set_x0 == True:
-      icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 3 : Benzene in Sidedraw_wt%'] = 70
-      icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980
-      icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
+      icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70.0
+      icg_input['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980.0
+      icg_input['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10.0
       
     # c620 部份
     c620_case = pd.DataFrame(index=idx,columns=self.c620_col['case'])
@@ -205,13 +205,13 @@ class AllSystem(object):
       輸入端bz = icg_input['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
       輸出端bz = c620_wt['Tatoray Stripper C620 Operation_Sidedraw Production Rate and Composition_Benzene_wt%'].values[0]
       
-      # bz 在輸入端和輸出端要一致
-      loss1 = abs(輸入端bz - 輸出端bz)      
+      # bz 希望輸入輸出兩端數值一致
+      loss1 = abs(輸入端bz - 輸出端bz) / 輸入端bz      
       
-      # 鼓勵dist_rate接近於1
-      loss2 = abs(dist_rate - 1) 
+      # 鼓勵dist_rate接近於1e-8 愈小愈好但是不能為0
+      loss2 = abs(dist_rate - 1e-8) / dist_rate 
       
-      return loss1 + loss2
+      return loss1 + loss2**2
     
     # cma-es給定優化初始值x0
     x0 = {}
@@ -298,13 +298,13 @@ class AllSystem(object):
       輸出端nainbz = c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
       輸出端tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
       
-      # 這一項是多個成份的加總
-      loss1 = abs(輸入端nainbz - 輸出端nainbz)
+      # 這一項是多個成份的加總 希望輸入輸出兩端數值一致
+      loss1 = abs(輸入端nainbz - 輸出端nainbz) / 輸入端nainbz
       
-      # 這一項是單個成份簡稱tol
-      loss2 = abs(輸入端tol - 輸出端tol)
+      # 這一項是單個成份簡稱tol 希望輸入輸出兩端數值一致
+      loss2 = abs(輸入端tol - 輸出端tol) / 輸入端tol
       
-      return loss1 + len(na_idx)*loss2
+      return loss1**2 + loss2
     
     # cma-es 優化初始值 x0
     x0 = {}
@@ -346,8 +346,6 @@ class AllSystem(object):
     print('bz_error:',bz_error)
     print('nainbz_error:',nainbz_error)
     print('tol_error:',tol_error)
-    print('dist_rate',c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0])
-    print('nainbz:',c660_wt.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000)
 
     # c670 部份
     c660_mf_bot = np.sum(c660_mf*c660_feed.values*s4*0.01,axis=1,keepdims=True) # c660_bot 重量流量
