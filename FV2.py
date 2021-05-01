@@ -7,6 +7,7 @@ import autorch
 from autorch.function import sp2wt
 import optuna
 import torch
+from tqdm import tqdm_notebook as tqdm
 
 class AllSystem(object):
   def __init__(self,config):
