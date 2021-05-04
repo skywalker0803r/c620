@@ -30,7 +30,7 @@ config = {
       'c670_wt_always_same_split_factor_dict':'data/c670_wt_always_same_split_factor_dict.pkl',
       
       # op fix model
-      'op_fix_model':'model/fix_model(one_to_one).pkl',
+      'op_fix_model':'model/fix_model.pkl',
 
       # input log Excel file
        'input_log_path':'log/input_log.xlsx',
