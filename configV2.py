@@ -30,19 +30,6 @@ config = {
       'c670_wt_always_same_split_factor_dict':'data/c670_wt_always_same_split_factor_dict.pkl',
       
       # op fix model
-      'op_fix_model':'model/fix_model.pkl',
-
-      # input log Excel file
-       'input_log_path':'log/input_log.xlsx',
-      
-      # wt log Excel file
-       'c620_wt_log_path':'log/c620_wt_log.xlsx',
-       'c660_wt_log_path':'log/c660_wt_log.xlsx',
-       'c670_wt_log_path':'log/c670_wt_log.xlsx',
-          
-      # op log Excel file
-       'c620_op_log_path':'log/c620_op_log.xlsx',
-       'c660_op_log_path':'log/c660_op_log.xlsx',
-       'c670_op_log_path':'log/c670_op_log.xlsx',
+      'op_fix_model':'model/fix_model.pkl'
       
           }

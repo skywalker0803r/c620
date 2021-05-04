@@ -4,8 +4,8 @@ import numpy as np
 import joblib
 import time
 import os
-from FV2 import AllSystem
-from configV2 import config
+from F import F
+from config import config
 import xlrd
 
 # functions
@@ -32,12 +32,14 @@ def let_user_input(title,default_input):
     st.write(default_input)
 
 # get F module
-f = joblib.load('model/allsystem.pkl')
+f = F(config)
 
 # select mode
-model_mode = st.radio("您想試算還是推薦？",('推薦', '試算'))
-search_iteration = st.number_input('搜索次數',value=100)
+mode = st.radio("您想試算還是推薦？",('推薦', '試算'))
+f.Recommended_mode = bool(mode == '推薦')
+
 data_mode = st.radio("模擬數據還是現場數據？",('模擬', '現場'))
+f.real_data_mode = bool(mode == '現場')
 
 # get demo data
 if data_mode == '模擬':
@@ -71,11 +73,8 @@ let_user_input("C620_feed",c620_feed)
 let_user_input("T651_feed",t651_feed)
 
 if st.button('Prediction'):
-    if model_mode == '推薦':
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,bz_error,nainbz_error,tol_error = f.recommend(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),search_iteration=search_iteration)
-        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy())
-    if model_mode == '試算':
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy())
+    show_progress()
+    c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_feed,t651_feed)
     
     # save input
     save(icg_input.join(c620_feed).join(t651_feed),config['input_log_path'])
@@ -103,14 +102,3 @@ if st.button('Prediction'):
     st.write(c670_op)
     save(c670_wt,config['c670_wt_log_path'])
     save(c670_op,config['c670_op_log_path'])
-
-    if model_mode == '推薦':
-        
-        st.subheader('c620_op調幅')
-        st.write(c620_op-c620_op2)
-        
-        st.subheader('c660_op調幅')
-        st.write(c660_op-c660_op2)
-        
-        st.subheader('c670_op調幅')
-        st.write(c670_op-c670_op2)

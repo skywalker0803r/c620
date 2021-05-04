@@ -29,22 +29,6 @@ class AllSystem(object):
     
     # 用來修正現場儀表的誤差
     self.op_fix_model = joblib.load(config['op_fix_model'])
-    self.op_bias = {'Benzene Column C660 Operation_Column Temp Profile_C660 Tray 23 (Control)_oC': -0.5616992712020874,
- 'Benzene Column C660 Operation_Column Temp Profile_C660 Tray 6 (SD & Control)_oC': -0.5311859250068665,
- 'Benzene Column C660 Operation_Yield Summary_Reflux Rate_m3/hr': -23.2098445892334,
- 'Density_Bottoms Production Rate and Composition': 0.003680689726024866,
- 'Density_Distillate (Benzene Drag) Production Rate and Composition': -0.002266152761876583,
- 'Density_Distillate Production Rate and Composition': 0.00015364743012469262,
- 'Density_Feed Properties': 0.0001229307526955381,
- 'Density_Sidedraw (Benzene )Production Rate and Composition': 0.0012807963648810983,
- 'Density_Sidedraw Production Rate and Composition': 0.0005597509443759918,
- 'Density_Vent Gas Production Rate and Composition': 0.015023279003798962,
- 'Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 14 (Control)_oC': -14.776540756225586,
- 'Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 34 (Control)_oC': -12.766730308532715,
- 'Tatoray Stripper C620 Operation_Yield Summary_Reflux Rate_m3/hr': -1.447864055633545,
- 'Toluene Column C670 Operation_Column Temp Profile_C670 Btm Temp (Control)_oC': -2.3342103958129883,
- 'Toluene Column C670 Operation_Column Temp Profile_C670 Tray 24 (Control)_oC': 0.29816916584968567,
- 'Toluene Column C670 Operation_Yield \nSummary_Reflux Rate_m3/hr': -55.309078216552734}
 
     # 欄位名稱列表
     self.icg_col = joblib.load(config['icg_col_path'])
@@ -166,10 +150,12 @@ class AllSystem(object):
                                  'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
                                  axis=1).columns.tolist()
       
-      # 直接放偏移上去
-      op_pred = c620_op.join(c660_op).join(c670_op)
-      for k,v in self.op_bias.items():
-        op_pred[k] += v 
+      # 經過修正模組修正op
+      op_pred = self.op_fix_model(torch.cat((
+        torch.FloatTensor(c620_op[c620_op_col].values),
+        torch.FloatTensor(c660_op[c660_op_col].values),
+        torch.FloatTensor(c670_op[c670_op_col].values)),dim=1))
+      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
       
       # 新的op
       new_c620_op = op_pred.iloc[:,:8]
@@ -242,7 +228,7 @@ class AllSystem(object):
     x0['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
     
     # 建立 cma-es study 並賦予初始值X0
-    sampler = optuna.samplers.CmaEsSampler(x0=x0,sigma0=1.0,restart_strategy='ipop',seed=42)
+    sampler = optuna.samplers.CmaEsSampler(x0=x0)
     study = optuna.create_study(sampler=sampler)
     
     # cma-es 搜索階段
@@ -335,26 +321,17 @@ class AllSystem(object):
       output_tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
       output_dist_rate = c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
       
-      bzinside_loss = abs(input_bzinside - output_bzinside) / (input_bzinside+1e-8) #絕對百分比誤差
-      nainbz_loss = abs(input_nainbz - output_nainbz) / (input_nainbz+1e-8) #絕對百分比誤差
-      tol_loss = abs(input_tol - output_tol) / (input_tol+1e-8) #絕對百分比誤差
+      bzinside_loss = abs(input_bzinside - output_bzinside) / input_bzinside #絕對百分比誤差
+      nainbz_loss = abs(input_nainbz - output_nainbz) / input_nainbz #絕對百分比誤差
+      tol_loss = abs(input_tol - output_tol) / input_tol #絕對百分比誤差
       distrate_loss = max(output_dist_rate - input_dist_rate,0) # distrate根據廠區說法愈小愈好,因此如果採樣出的如果採樣出的dist_rate大於input_dist_rate就會有loss,否則為0
-      total_loss = np.max([bzinside_loss,nainbz_loss,tol_loss,distrate_loss])
+      total_loss = bzinside_loss + nainbz_loss + tol_loss + distrate_loss #總損失
+      
       # 把總損失告訴study供下一次採樣的依據
       study.tell(trial,total_loss)
 
-      if i%10 == 0:
-        print(f'epoch:{i}')
-        performance = pd.DataFrame(index=[i],columns=['output_bzinside','output_nainbz','output_tol','output_dist_rate'])
-        performance['output_bzinside'] = output_bzinside
-        performance['output_nainbz'] = output_nainbz
-        performance['output_tol'] = output_tol
-        performance['output_dist_rate'] = output_dist_rate
-        performance['max_loss'] = np.max([bzinside_loss,nainbz_loss,tol_loss,distrate_loss])
-        print(performance)
-
       # 如果滿足以下條件就算提早成功
-      if (bzinside_loss <= 0.01) and (nainbz_loss <= 0.01) and (tol_loss <= 0.01) and (distrate_loss == 0):
+      if (bzinside_loss<=0.02) and (nainbz_loss<=0.05) and (tol_loss<=0.1) and (distrate_loss==0):
         print('Congratulations Early Success find optimal op')
         break
     
@@ -463,10 +440,12 @@ class AllSystem(object):
                                  'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
                                  axis=1).columns.tolist()
       
-      # 直接放偏移上去
-      op_pred = c620_op.join(c660_op).join(c670_op)
-      for k,v in self.op_bias.items():
-        op_pred[k] += v 
+      # 經過修正模組修正op
+      op_pred = self.op_fix_model(torch.cat((
+        torch.FloatTensor(c620_op_opt[c620_op_col].values),
+        torch.FloatTensor(c660_op_opt[c660_op_col].values),
+        torch.FloatTensor(c670_op_opt[c670_op_col].values)),dim=1))  
+      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
       
       # 新的op
       new_c620_op = op_pred.iloc[:,:8]
@@ -481,4 +460,4 @@ class AllSystem(object):
       c660_op_opt.update(new_c660_op)
       c670_op_opt.update(new_c670_op)
       
-      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bzinside_loss,nainbz_loss,tol_loss
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
