@@ -29,6 +29,22 @@ class AllSystem(object):
     
     # 用來修正現場儀表的誤差
     self.op_fix_model = joblib.load(config['op_fix_model'])
+    self.op_bias = {'Benzene Column C660 Operation_Column Temp Profile_C660 Tray 23 (Control)_oC': -0.5616992712020874,
+ 'Benzene Column C660 Operation_Column Temp Profile_C660 Tray 6 (SD & Control)_oC': -0.5311859250068665,
+ 'Benzene Column C660 Operation_Yield Summary_Reflux Rate_m3/hr': -23.2098445892334,
+ 'Density_Bottoms Production Rate and Composition': 0.003680689726024866,
+ 'Density_Distillate (Benzene Drag) Production Rate and Composition': -0.002266152761876583,
+ 'Density_Distillate Production Rate and Composition': 0.00015364743012469262,
+ 'Density_Feed Properties': 0.0001229307526955381,
+ 'Density_Sidedraw (Benzene )Production Rate and Composition': 0.0012807963648810983,
+ 'Density_Sidedraw Production Rate and Composition': 0.0005597509443759918,
+ 'Density_Vent Gas Production Rate and Composition': 0.015023279003798962,
+ 'Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 14 (Control)_oC': -14.776540756225586,
+ 'Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 34 (Control)_oC': -12.766730308532715,
+ 'Tatoray Stripper C620 Operation_Yield Summary_Reflux Rate_m3/hr': -1.447864055633545,
+ 'Toluene Column C670 Operation_Column Temp Profile_C670 Btm Temp (Control)_oC': -2.3342103958129883,
+ 'Toluene Column C670 Operation_Column Temp Profile_C670 Tray 24 (Control)_oC': 0.29816916584968567,
+ 'Toluene Column C670 Operation_Yield \nSummary_Reflux Rate_m3/hr': -55.309078216552734}
 
     # 欄位名稱列表
     self.icg_col = joblib.load(config['icg_col_path'])
@@ -150,12 +166,10 @@ class AllSystem(object):
                                  'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
                                  axis=1).columns.tolist()
       
-      # 經過修正模組修正op
-      op_pred = self.op_fix_model(torch.cat((
-        torch.FloatTensor(c620_op[c620_op_col].values),
-        torch.FloatTensor(c660_op[c660_op_col].values),
-        torch.FloatTensor(c670_op[c670_op_col].values)),dim=1))
-      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
+      # 直接放偏移上去
+      op_pred = c620_op.join(c660_op).join(c670_op)
+      for k,v in self.op_bias.items():
+        op_pred[k] += v 
       
       # 新的op
       new_c620_op = op_pred.iloc[:,:8]
@@ -449,12 +463,10 @@ class AllSystem(object):
                                  'Toluene Column C670 Operation_Heat Duty_Reboiler Heat Duty_Mkcal/hr'],
                                  axis=1).columns.tolist()
       
-      # 經過修正模組修正op
-      op_pred = self.op_fix_model(torch.cat((
-        torch.FloatTensor(c620_op_opt[c620_op_col].values),
-        torch.FloatTensor(c660_op_opt[c660_op_col].values),
-        torch.FloatTensor(c670_op_opt[c670_op_col].values)),dim=1))  
-      op_pred = pd.DataFrame(op_pred.detach().numpy(),index=idx)
+      # 直接放偏移上去
+      op_pred = c620_op.join(c660_op).join(c670_op)
+      for k,v in self.op_bias.items():
+        op_pred[k] += v 
       
       # 新的op
       new_c620_op = op_pred.iloc[:,:8]
