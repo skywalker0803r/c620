@@ -228,7 +228,7 @@ class AllSystem(object):
     x0['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
     
     # 建立 cma-es study 並賦予初始值X0
-    sampler = optuna.samplers.CmaEsSampler(x0=x0)
+    sampler = optuna.samplers.CmaEsSampler(x0=x0,sigma0=1.0,restart_strategy='ipop')
     study = optuna.create_study(sampler=sampler)
     
     # cma-es 搜索階段
@@ -321,17 +321,26 @@ class AllSystem(object):
       output_tol = c660_wt['Benzene Column C660 Operation_Sidedraw (Benzene )Production Rate and Composition_Toluene_wt%'].values[0]*10000
       output_dist_rate = c620_case['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
       
-      bzinside_loss = abs(input_bzinside - output_bzinside) / input_bzinside #絕對百分比誤差
-      nainbz_loss = abs(input_nainbz - output_nainbz) / input_nainbz #絕對百分比誤差
-      tol_loss = abs(input_tol - output_tol) / input_tol #絕對百分比誤差
+      bzinside_loss = abs(input_bzinside - output_bzinside) / (input_bzinside+1e-8) #絕對百分比誤差
+      nainbz_loss = abs(input_nainbz - output_nainbz) / (input_nainbz+1e-8) #絕對百分比誤差
+      tol_loss = abs(input_tol - output_tol) / (input_tol+1e-8) #絕對百分比誤差
       distrate_loss = max(output_dist_rate - input_dist_rate,0) # distrate根據廠區說法愈小愈好,因此如果採樣出的如果採樣出的dist_rate大於input_dist_rate就會有loss,否則為0
-      total_loss = bzinside_loss + nainbz_loss + tol_loss + distrate_loss #總損失
-      
+      total_loss = np.max([bzinside_loss,nainbz_loss,tol_loss,distrate_loss])
       # 把總損失告訴study供下一次採樣的依據
       study.tell(trial,total_loss)
 
+      if i%10 == 0:
+        print(f'epoch:{i}')
+        performance = pd.DataFrame(index=[i],columns=['output_bzinside','output_nainbz','output_tol','output_dist_rate'])
+        performance['output_bzinside'] = output_bzinside
+        performance['output_nainbz'] = output_nainbz
+        performance['output_tol'] = output_tol
+        performance['output_dist_rate'] = output_dist_rate
+        performance['max_loss'] = np.max([bzinside_loss,nainbz_loss,tol_loss,distrate_loss])
+        print(performance)
+
       # 如果滿足以下條件就算提早成功
-      if (bzinside_loss<=0.02) and (nainbz_loss<=0.05) and (tol_loss<=0.1) and (distrate_loss==0):
+      if (bzinside_loss <= 0.01) and (nainbz_loss <= 0.01) and (tol_loss <= 0.01) and (distrate_loss == 0):
         print('Congratulations Early Success find optimal op')
         break
     
