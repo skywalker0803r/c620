@@ -469,4 +469,4 @@ class AllSystem(object):
       c660_op_opt.update(new_c660_op)
       c670_op_opt.update(new_c670_op)
       
-      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bz_error,nainbz_error,tol_error
+      return c620_wt,c620_op_opt,c660_wt,c660_op_opt,c670_wt,c670_op_opt,bzinside_loss,nainbz_loss,tol_loss
