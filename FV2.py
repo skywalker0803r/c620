@@ -228,7 +228,7 @@ class AllSystem(object):
     x0['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = icg_input['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'].values[0]
     
     # 建立 cma-es study 並賦予初始值X0
-    sampler = optuna.samplers.CmaEsSampler(x0=x0,sigma0=1.0,restart_strategy='ipop')
+    sampler = optuna.samplers.CmaEsSampler(x0=x0,sigma0=1.0,restart_strategy='ipop',seed=42)
     study = optuna.create_study(sampler=sampler)
     
     # cma-es 搜索階段
