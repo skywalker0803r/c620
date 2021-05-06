@@ -8,7 +8,7 @@ from FV2 import AllSystem
 from configV2 import config
 import xlrd
 
-# functions
+# 一些函數
 def save(row,log_path):
     try:
         log_df = pd.read_excel(log_path,index_col=0,engine='openpyxl')
@@ -31,15 +31,14 @@ def let_user_input(title,default_input):
     st.subheader('{} 輸入值為：'.format(title))
     st.write(default_input)
 
-# get F module
+# 載入模組
 f = joblib.load('model/allsystem.pkl')
 
-# select mode
+# 選擇模式
 model_mode = st.radio("您想試算還是推薦？",('推薦', '試算'))
-search_iteration = st.number_input('搜索次數',value=100)
 data_mode = st.radio("模擬數據還是現場數據？",('模擬', '現場'))
 
-# get demo data
+# 取得展示用資料
 if data_mode == '模擬':
     demo = joblib.load('./data/demo.pkl')
     icg_input = demo['icg_input']
@@ -54,63 +53,75 @@ if data_mode == '現場':
     t651_feed = demo['t651_feed'].loc[[idx]]
     
 
-# USER NEED INPUT TAG
+# 讓使用者輸入標籤
 st.subheader('給這一次試算一個tag吧')
 tag = st.text_input('輸入tag')
 if st.button('確定'):
     st.write('tag名稱為:{}'.format(tag))
 
-# setting tag 
+# 設置標籤
 icg_input.index = [tag]
 c620_feed.index = [tag]
 t651_feed.index = [tag]
 
-# USER INPUT ALL
+# 讓使用者輸入
 let_user_input("ICG_INPUT",icg_input)
 let_user_input("C620_feed",c620_feed)
 let_user_input("T651_feed",t651_feed)
 
 if st.button('Prediction'):
     if model_mode == '推薦':
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,bz_error,nainbz_error,tol_error = f.recommend(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),search_iteration=search_iteration)
-        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy())
+        
+        # 先就現有數據試算一遍,稱之為第一次試算
+        c620_wt1,c620_op1,c660_wt1,c660_op1,c670_wt1,c670_op1 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+        
+        # 調整icg_input到使用者期望的規格,調整過後的icg_input稱之為icg_input2
+        icg_input2 = icg_input.copy()
+        icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980
+        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0] > 150:
+            icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
+        else:
+            icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
+        icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
+        
+        # 再用調整過的icg_input2試算一遍,稱之為第二次試算,只後只要把第二次試算減去第一次試算就能得到 "調幅"
+        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+    
     if model_mode == '試算':
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy())
+        # 單純試算即可
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
     
-    # save input
-    save(icg_input.join(c620_feed).join(t651_feed),config['input_log_path'])
-    
-    # c620 output
-    st.subheader('C620_wt')
-    st.write(c620_wt)
-    st.subheader('C620_op')
-    st.write(c620_op)
-    save(c620_wt,config['c620_wt_log_path'])
-    save(c620_op,config['c620_op_log_path'])
+    # 保存試算結果
+    if model_mode == '試算':
+        # save input
+        save(icg_input.join(c620_feed).join(t651_feed),config['input_log_path'])
+        # c620 output
+        st.subheader('C620_wt')
+        st.write(c620_wt)
+        st.subheader('C620_op')
+        st.write(c620_op)
+        save(c620_wt,config['c620_wt_log_path'])
+        save(c620_op,config['c620_op_log_path'])
+        # c660 output
+        st.subheader('C660_wt')
+        st.write(c660_wt)
+        st.subheader('C660_op')
+        st.write(c660_op)
+        save(c660_wt,config['c660_wt_log_path'])
+        save(c660_op,config['c660_op_log_path'])
+        # c670 output
+        st.subheader('C670_wt')
+        st.write(c670_wt)
+        st.subheader('C670_op')
+        st.write(c670_op)
+        save(c670_wt,config['c670_wt_log_path'])
+        save(c670_op,config['c670_op_log_path'])
 
-    # c660 output
-    st.subheader('C660_wt')
-    st.write(c660_wt)
-    st.subheader('C660_op')
-    st.write(c660_op)
-    save(c660_wt,config['c660_wt_log_path'])
-    save(c660_op,config['c660_op_log_path'])
-
-    # c670 output
-    st.subheader('C670_wt')
-    st.write(c670_wt)
-    st.subheader('C670_op')
-    st.write(c670_op)
-    save(c670_wt,config['c670_wt_log_path'])
-    save(c670_op,config['c670_op_log_path'])
-
+    # 展示調幅建議
     if model_mode == '推薦':
-        
         st.subheader('c620_op調幅')
-        st.write(c620_op-c620_op2)
-        
+        st.write(c620_op2-c620_op1)
         st.subheader('c660_op調幅')
-        st.write(c660_op-c660_op2)
-        
+        st.write(c660_op2-c660_op1)
         st.subheader('c670_op調幅')
-        st.write(c670_op-c670_op2)
+        st.write(c670_op2-c670_op1)
