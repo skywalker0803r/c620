@@ -7,6 +7,7 @@ import os
 from FV2 import AllSystem
 from configV2 import config
 import xlrd
+from tqdm import tqdm
 
 # 一些函數
 def save(row,log_path):
@@ -77,15 +78,35 @@ if st.button('Prediction'):
         
         # 調整icg_input到使用者期望的規格,調整過後的icg_input稱之為icg_input2
         icg_input2 = icg_input.copy()
-        icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980
-        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0] > 150:
+        
+        icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = 0.0 #從0看情況增加
+        icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980 # 980最理想
+        icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10 #10最理想
+        
+        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0] > 150: # 兩種情況一種設為80第二種設為70
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
         else:
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
-        icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10
         
-        # 再用調整過的icg_input2試算一遍,稱之為第二次試算,只後只要把第二次試算減去第一次試算就能得到 "調幅"
-        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+        
+        history={}
+        history['distrate'] = []
+        history['nainbz'] = []
+        step = 0.05
+
+        # dist_rate開始遞增直到 nainbz <= 980
+        for dist_rate in tqdm(np.arange(0,10,step)):
+            icg_input2 = demo['icg_input'].copy()
+            icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
+            c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2 = f.inference(icg_input2,demo['c620_feed'],demo['t651_feed'],real_data_mode = bool(data_mode == '現場'))
+            na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
+            nainbz = c660_wt2.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
+            history['distrate'].append(dist_rate)
+            history['nainbz'].append(nainbz)
+            st.write(f'dist_rate:{dist_rate} nainbz:{nainbz}') #打印訊息
+            # 如果滿足以下條件跳出迴圈
+            if nainbz <= 980:
+                break
     
     if model_mode == '試算':
         # 單純試算即可
@@ -119,9 +140,27 @@ if st.button('Prediction'):
 
     # 展示調幅建議
     if model_mode == '推薦':
+        
+        # 調幅
         st.subheader('c620_op調幅')
         st.write(c620_op2-c620_op1)
         st.subheader('c660_op調幅')
         st.write(c660_op2-c660_op1)
         st.subheader('c670_op調幅')
         st.write(c670_op2-c670_op1)
+
+        # op1
+        st.subheader('c620_op1')
+        st.write(c620_op1)
+        st.subheader('c660_op1')
+        st.write(c660_op1)
+        st.subheader('c670_op1')
+        st.write(c670_op1)
+
+        # op2
+        st.subheader('c620_op2')
+        st.write(c620_op2)
+        st.subheader('c660_op2')
+        st.write(c660_op2)
+        st.subheader('c670_op2')
+        st.write(c670_op2)
