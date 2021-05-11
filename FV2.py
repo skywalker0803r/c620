@@ -72,6 +72,7 @@ class AllSystem(object):
     
     # 預測c620操作條件和分離係數
     c620_op = self.c620_G.predict(c620_case.join(c620_feed))
+    c620_op = pd.DataFrame(c620_op,index = c620_case.index,columns = self.c620_op_col)
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op))
     
     # 計算c620輸出組成
