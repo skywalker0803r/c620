@@ -49,9 +49,9 @@ class AllSystem(object):
     self.T651_density = 0.8749
 
     # 操作欄位名稱列表
-    self.c620_op_col = self.c620_G.y_col # G系列模型本身就是預測操作條件
-    self.c660_op_col = self.c660_G.y_col # G系列模型本身就是預測操作條件
-    self.c670_op_col = self.c670_M.y_col[41*2:] #前面82個是分離係數後面都是操作條件
+    self.c620_op_col = self.c620_col['density']+self.c620_col['yRefluxRate']+self.c620_col['yHeatDuty']+self.c620_col['yControl']
+    self.c660_op_col = self.c660_col['density']+self.c660_col['yRefluxRate']+self.c660_col['yHeatDuty']+self.c660_col['yControl']
+    self.c670_op_col = self.c670_col['density']+self.c670_col['yRefluxRate']+self.c670_col['yHeatDuty']+self.c670_col['yControl']
 
     # 廠區通常調整欄位列表
     self.c620_op_col_can_change = ['Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 14 (Control)_oC','Tatoray Stripper C620 Operation_Column Temp Profile_C620 Tray 34 (Control)_oC']
