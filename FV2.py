@@ -73,6 +73,7 @@ class AllSystem(object):
     # 預測c620操作條件和分離係數
     c620_op = self.c620_G.predict(c620_case.join(c620_feed))
     c620_sp = self.c620_F.predict(c620_case.join(c620_feed).join(c620_op))
+    c620_density_side = c620_op['Density_Sidedraw Production Rate and Composition'].values
     
     # 計算c620輸出組成
     s1,s2,s3,s4 = c620_sp.iloc[:,:41].values,c620_sp.iloc[:,41:41*2].values,c620_sp.iloc[:,41*2:41*3].values,c620_sp.iloc[:,41*3:41*4].values
@@ -89,7 +90,7 @@ class AllSystem(object):
     c620_mf_side = np.sum(c620_feed_rate_ton*c620_feed.values*s3*0.01,axis=1,keepdims=True)
     c620_mf_bot = np.sum(c620_feed_rate_ton*c620_feed.values*s4*0.01,axis=1,keepdims=True)
     t651_mf = (icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr']*self.T651_density).values.reshape(-1,1)
-    c660_mf = t651_mf + c620_mf_side # 這一項大於150則 BZ in SideDraw =85
+    c660_mf = t651_mf + c620_mf_side
     t651_mf_p ,c620_mf_side_p = t651_mf/c660_mf ,c620_mf_side/c660_mf
     c660_feed = c620_wt[self.c620_col['sidedraw_x']].values*c620_mf_side_p + t651_feed.values*t651_mf_p
     c660_feed = pd.DataFrame(c660_feed,index=idx,columns=self.c660_col['x41'])
@@ -136,7 +137,7 @@ class AllSystem(object):
     
     # 是否修正操作條件 for 現場數據
     if real_data_mode == False:
-      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,c660_mf
+      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op, c620_mf_side/c620_density_side
     
     if real_data_mode == True:
       # 有些欄位現場數據沒有
@@ -170,7 +171,7 @@ class AllSystem(object):
       c660_op.update(new_c660_op)
       c670_op.update(new_c670_op)
       
-      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,c660_mf
+      return c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op, c620_mf_side/c620_density_side
   
   def recommend(self,icg_input,c620_feed,t651_feed,
                 search_iteration = 300, # cma-es優化搜索次數
