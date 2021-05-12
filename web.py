@@ -74,7 +74,7 @@ if st.button('Prediction'):
     if model_mode == '推薦':
         
         # 先就現有數據試算一遍,稱之為第一次試算
-        c620_wt1,c620_op1,c660_wt1,c660_op1,c670_wt1,c670_op1,c660_mf1 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+        c620_wt1,c620_op1,c660_wt1,c660_op1,c670_wt1,c670_op1,c620_side_體積流量1 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
         
         # 調整icg_input到使用者期望的規格,調整過後的icg_input稱之為icg_input2
         icg_input2 = icg_input.copy()
@@ -83,7 +83,7 @@ if st.button('Prediction'):
         icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980 # 980最理想
         icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10 #10最理想
         
-        if c660_mf1[0,0] > 150: # 兩種情況一種設為80第二種設為70
+        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0]+c620_side_體積流量1[0,0] > 150: # 兩種情況一種設為85第二種設為70
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
         else:
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
@@ -110,7 +110,7 @@ if st.button('Prediction'):
     
     if model_mode == '試算':
         # 單純試算即可
-        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,c660_mf1 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+        c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op,c620_side_體積流量2 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
     
     # 保存試算結果
     if model_mode == '試算':
