@@ -83,7 +83,7 @@ if st.button('Prediction'):
         icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980 # 980最理想
         icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10 #10最理想
         
-        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0] + c660_mf1[0,0] > 150: # 兩種情況一種設為80第二種設為70
+        if c660_mf1[0,0] > 150: # 兩種情況一種設為80第二種設為70
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
         else:
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
