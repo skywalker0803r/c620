@@ -82,11 +82,14 @@ if st.button('Prediction'):
         icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = 0.0 #從0看情況增加
         icg_input2['Simulation Case Conditions_Spec 2 : NA in Benzene_ppmw'] = 980 # 980最理想
         icg_input2['Benzene Column C660 Operation_Specifications_Spec 3 : Toluene in Benzene_ppmw'] = 10 #10最理想
+        icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
         
-        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0]+c620_side_體積流量1[0,0] > 150: # 兩種情況一種設為85第二種設為70
+        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
+        if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0]+c620_side_體積流量2[0,0] > 150: # 兩種情況一種設為85第二種設為70
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
         else:
             icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
+        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode = bool(data_mode == '現場'))
         
         
         history={}
