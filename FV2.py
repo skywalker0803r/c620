@@ -176,7 +176,7 @@ class AllSystem(object):
   def recommend(self,icg_input,c620_feed,t651_feed,real_data_mode=False):
     
      # 第一次試算
-     c620_wt1,c620_op1,c660_wt1,c660_op1,c670_wt1,c670_op1,c620_side_體積流量1 = f.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)
+     c620_wt1,c620_op1,c660_wt1,c660_op1,c670_wt1,c670_op1,c620_side_體積流量1 = self.inference(icg_input.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)
      
      # 調整spec後第二次試算
      icg_input2 = icg_input.copy()
@@ -187,12 +187,12 @@ class AllSystem(object):
      
      # 如果t651_m3/hr + c620_side_體積流量 > 150 則 Benzene in C620 Sidedraw_wt% =85
      # 並做第三次試算
-     c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)
+     c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = self.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)
      if icg_input['Simulation Case Conditions_Feed Rate_Feed from T651_m3/hr'].values[0]+c620_side_體積流量2[0,0] > 150: # 兩種情況一種設為85第二種設為70
        icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 85
      else:
        icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
-     c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = f.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)    
+     c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = self.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)    
      
      # dist_rate開始遞增直到 nainbz <= 980
      history={}
@@ -202,7 +202,7 @@ class AllSystem(object):
      for dist_rate in tqdm(np.arange(0,10,step)):
         icg_input2 = demo['icg_input'].copy()
         icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
-        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = f.inference(icg_input2,demo['c620_feed'],demo['t651_feed'],real_data_mode = bool(data_mode == '現場'))
+        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = self.inference(icg_input2,demo['c620_feed'],demo['t651_feed'],real_data_mode = bool(data_mode == '現場'))
         na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
         nainbz = c660_wt2.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
         history['distrate'].append(dist_rate)
