@@ -199,7 +199,7 @@ class AllSystem(object):
      history['nainbz'] = []
      step = 0.05
      for dist_rate in tqdm(np.arange(0,10,step)):
-        icg_input2 = icg_input.copy()
+        icg_input2 = icg_input2.copy()
         icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
         c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = self.inference(icg_input2.copy(),
                                                                                         c620_feed.copy(),
@@ -214,8 +214,6 @@ class AllSystem(object):
         # 如果滿足以下條件跳出迴圈
         if nainbz <= 980:
             break
-     print(c620_op1)
-     print(c620_op2) 
      c620_op_Δ = c620_op2 - c620_op1
      c660_op_Δ = c660_op2 - c660_op1
      c670_op_Δ = c670_op2 - c670_op1
