@@ -193,7 +193,8 @@ class AllSystem(object):
      else:
        icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'] = 70
      c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c620_side_體積流量2 = self.inference(icg_input2.copy(),c620_feed.copy(),t651_feed.copy(),real_data_mode=real_data_mode)    
-     
+     print(c620_op1)
+     print(c620_op2)
      # dist_rate開始遞增直到 nainbz <= 980
      history={}
      history['distrate'] = []
