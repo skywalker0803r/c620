@@ -202,7 +202,11 @@ class AllSystem(object):
      for dist_rate in tqdm(np.arange(0,10,step)):
         icg_input2 = demo['icg_input'].copy()
         icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
-        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = self.inference(icg_input2,demo['c620_feed'],demo['t651_feed'],real_data_mode = bool(data_mode == '現場'))
+        c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = self.inference(icg_input2.copy(),
+                                                                                        c620_feed.copy(),
+                                                                                        t651_feed.copy(),
+                                                                                        real_data_mode = real_data_mode
+                                                                                       )
         na_idx = [1,2,3,4,5,6,8,9,11,13,14,15,20,22,29] 
         nainbz = c660_wt2.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
         history['distrate'].append(dist_rate)
