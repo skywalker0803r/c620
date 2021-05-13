@@ -211,7 +211,7 @@ class AllSystem(object):
         nainbz = c660_wt2.filter(regex='Side').filter(regex='wt%').iloc[:,na_idx].sum(axis=1).values[0]*10000
         history['distrate'].append(dist_rate)
         history['nainbz'].append(nainbz)
-        st.write(f'dist_rate:{dist_rate} nainbz:{nainbz}') #打印訊息
+        print(f'dist_rate:{dist_rate} nainbz:{nainbz}') #打印訊息
         # 如果滿足以下條件跳出迴圈
         if nainbz <= 980:
             break
