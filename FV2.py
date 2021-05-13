@@ -199,7 +199,7 @@ class AllSystem(object):
      history['distrate'] = []
      history['nainbz'] = []
      step = 0.05
-    for dist_rate in tqdm(np.arange(0,10,step)):
+     for dist_rate in tqdm(np.arange(0,10,step)):
         icg_input2 = demo['icg_input'].copy()
         icg_input2['Tatoray Stripper C620 Operation_Specifications_Spec 2 : Distillate Rate_m3/hr'] = dist_rate
         c620_wt2,c620_op2,c660_wt2,c660_op2,c670_wt2,c670_op2,c660_mf2 = f.inference(icg_input2,demo['c620_feed'],demo['t651_feed'],real_data_mode = bool(data_mode == '現場'))
