@@ -211,14 +211,12 @@ class AllSystem(object):
         # 如果滿足以下條件跳出迴圈
         if nainbz <= 980:
             break
-    
-    c620_op_Δ = c620_op2 - c620_op1
-    c660_op_Δ = c660_op2 - c660_op1
-    c670_op_Δ = c670_op2 - c670_op1 
-    
-    # 輸出操作規格(Distillate, SideDraw in BZ, NA in BZ)以及OP2 和調幅
-    SideDraw_in_BZ = icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
-    return dist_rate ,SideDraw_in_BZ ,nainbz ,c620_op2 ,c660_op2 ,c670_op2 ,c620_op_Δ ,c660_op_Δ ,c670_op_Δ
+     c620_op_Δ = c620_op2 - c620_op1
+     c660_op_Δ = c660_op2 - c660_op1
+     c670_op_Δ = c670_op2 - c670_op1
+     # 輸出操作規格(Distillate, SideDraw in BZ, NA in BZ)以及OP2 和調幅
+     SideDraw_in_BZ = icg_input2['Simulation Case Conditions_Spec 1 : Benzene in C620 Sidedraw_wt%'].values[0]
+     return dist_rate ,SideDraw_in_BZ ,nainbz ,c620_op2 ,c660_op2 ,c670_op2 ,c620_op_Δ ,c660_op_Δ ,c670_op_Δ
      
   def recommend_with_cmaes(self,icg_input,c620_feed,t651_feed,
                 search_iteration = 300, # cma-es優化搜索次數
