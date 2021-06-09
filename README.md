@@ -40,7 +40,7 @@ streamlit run web.py
 ![](https://github.com/skywalker0803r/c620/blob/main/img/overview2.PNG)
 
 ## 流程圖封裝 調用只須一行
-[使用範例](https://github.com/skywalker0803r/c620/blob/main/usage_example.py)
+[使用範例](https://github.com/skywalker0803r/c620/blob/main/test0526.ipynb)
 ```
 c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_feed,t651_feed)
 ```
