@@ -41,8 +41,10 @@ streamlit run web.py
 
 ## 流程圖封裝 調用只須一行
 [使用範例](https://github.com/skywalker0803r/c620/blob/main/test0526.ipynb)
+
+* 推薦
 ```
-c620_wt,c620_op,c660_wt,c660_op,c670_wt,c670_op = f(icg_input,c620_feed,t651_feed)
+dist_rate ,SideDraw_in_BZ ,nainbz ,c620_op2 ,c660_op2 ,c670_op2 ,c620_op_Δ ,c660_op_Δ ,c670_op_Δ = f.recommend(icg_input.copy(),c620_feed.copy(),t651_feed.copy())
 ```
 ![](https://github.com/skywalker0803r/c620/blob/main/img/F.png)
 
