@@ -37,7 +37,7 @@ streamlit run web.py
 
 ## 流程圖
 
-![](https://github.com/skywalker0803r/c620/blob/main/img/overview2.png)
+![](https://github.com/skywalker0803r/c620/blob/main/img/overview2.PNG)
 
 ## 流程圖封裝 調用只須一行
 [使用範例](https://github.com/skywalker0803r/c620/blob/main/usage_example.py)
